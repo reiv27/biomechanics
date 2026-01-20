@@ -66,6 +66,26 @@ python3 test_read_data.py data/Measurement1.tsv
 
 Displays marker information, metadata and statistics.
 
+### Angle Calculation
+
+```bash
+# Display angle plots
+python3 calculate_angles.py data/Measurement1.tsv
+
+# Save plots to file
+python3 calculate_angles.py data/Measurement1.tsv --save angles.png
+```
+
+**Calculated angles:**
+
+- **q1** (Right/Left): Angle between knee-ankle segment and XY plane
+- **q2** (Right/Left): Knee joint angle (ankle-knee-hip)
+- **q3** (Right/Left): Hip joint angle (knee-hip-shoulder)
+
+**Output:**
+- Three plots comparing right vs left side angles
+- Statistical summary (mean, std, range)
+
 ## Data
 
 - **Folder data/** - marker data files
