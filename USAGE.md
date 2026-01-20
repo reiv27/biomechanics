@@ -6,7 +6,17 @@
 **Назначение:** Быстрая проверка корректности данных без GUI.
 
 ```bash
+# Проверка файлов по умолчанию
 python3 test_read_data.py
+
+# Проверка конкретного файла
+python3 test_read_data.py clear_data/Measurement1.tsv
+
+# Проверка нескольких файлов
+python3 test_read_data.py clear_data/Measurement1.tsv clear_data/Measurement2.tsv
+
+# С полным путем
+python3 test_read_data.py /home/user/biomech/clear_data/Measurement1.tsv
 ```
 
 **Выводит:**
@@ -46,24 +56,27 @@ python3 plot_markers_static.py clear_data/Measurement1.tsv --frame 500
 # Интерактивный выбор файла
 python3 visualize_markers.py
 
-# Указать конкретный файл
-python3 visualize_markers.py --file milana/Measurement1.tsv
+# Указать конкретный файл (просто путь)
+python3 visualize_markers.py clear_data/Measurement1.tsv
+
+# С полным путем
+python3 visualize_markers.py /home/user/biomech/clear_data/Measurement1.tsv
 
 # Ускорить воспроизведение (показывать каждый 5-й кадр)
-python3 visualize_markers.py --file clear_data/Measurement1.tsv --skip-frames 5
+python3 visualize_markers.py clear_data/Measurement1.tsv --skip-frames 5
 
 # Замедлить воспроизведение (50 мс между кадрами)
-python3 visualize_markers.py --interval 50
+python3 visualize_markers.py clear_data/Measurement1.tsv --interval 50
 
 # Сохранить в GIF
-python3 visualize_markers.py --file milana/Measurement1.tsv --save animation.gif
+python3 visualize_markers.py clear_data/Measurement1.tsv --save animation.gif
 
 # Сохранить в MP4 (требуется ffmpeg)
-python3 visualize_markers.py --file clear_data/Measurement1.tsv --save animation.mp4
+python3 visualize_markers.py clear_data/Measurement2.tsv --save animation.mp4
 ```
 
 **Параметры:**
-- `--file` - путь к TSV файлу
+- `file` - путь к TSV файлу (позиционный аргумент, необязательный)
 - `--skip-frames N` - показывать каждый N-й кадр (1 = все кадры)
 - `--interval N` - интервал между кадрами в миллисекундах
 - `--save FILE` - сохранить анимацию в файл (.gif или .mp4)

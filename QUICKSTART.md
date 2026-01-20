@@ -37,19 +37,19 @@ python3 visualize_markers.py
 
 ### Создать статические графики
 ```bash
-python3 plot_markers_static.py milana/Measurement1.tsv \
+python3 plot_markers_static.py clear_data/Measurement1.tsv \
   --save-trajectories trajectories.png \
   --save-projections projections.png
 ```
 
 ### Ускоренная анимация
 ```bash
-python3 visualize_markers.py --skip-frames 5
+python3 visualize_markers.py clear_data/Measurement1.tsv --skip-frames 5
 ```
 
 ### Сохранить анимацию в GIF
 ```bash
-python3 visualize_markers.py --file milana/Measurement1.tsv --save animation.gif
+python3 visualize_markers.py clear_data/Measurement1.tsv --save animation.gif
 ```
 
 ## Доступные данные

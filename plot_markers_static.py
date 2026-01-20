@@ -11,15 +11,18 @@ from visualize_markers import MarkerDataReader
 import argparse
 
 
-def plot_marker_trajectories(frames_data, marker_names, title="Marker Trajectories"):
+def plot_marker_trajectories(frames_data, marker_names, simple_names=None, title="Marker Trajectories"):
   """
   Создает график траекторий всех маркеров в 3D.
   
   Args:
     frames_data: Массив данных (кадры, маркеры, XYZ)
     marker_names: Список имен маркеров
+    simple_names: Список простых имен (l1, r1 и т.д.)
     title: Заголовок графика
   """
+  if simple_names is None:
+    simple_names = marker_names
   # Создаем фигуру с 3D графиком
   fig = plt.figure(figsize=(14, 10))
   ax = fig.add_subplot(111, projection='3d')
@@ -28,7 +31,7 @@ def plot_marker_trajectories(frames_data, marker_names, title="Marker Trajectori
   colors = plt.cm.rainbow(np.linspace(0, 1, len(marker_names)))
   
   # Рисуем траекторию для каждого маркера
-  for marker_idx, (marker_name, color) in enumerate(zip(marker_names, colors)):
+  for marker_idx, (simple_name, color) in enumerate(zip(simple_names, colors)):
     # Извлекаем траекторию маркера (все кадры)
     trajectory = frames_data[:, marker_idx, :]
     
@@ -39,20 +42,33 @@ def plot_marker_trajectories(frames_data, marker_names, title="Marker Trajectori
       trajectory[:, 2],
       color=color,
       alpha=0.6,
-      linewidth=1,
-      label=marker_name
+      linewidth=2,
+      label=simple_name
     )
     
-    # Отмечаем начальную позицию
+    # Отмечаем начальную позицию с подписью
     ax.scatter(
       trajectory[0, 0],
       trajectory[0, 1],
       trajectory[0, 2],
       color=color,
-      s=100,
+      s=150,
       marker='o',
       edgecolors='black',
       linewidths=2
+    )
+    
+    # Добавляем подпись рядом с начальной позицией
+    ax.text(
+      trajectory[0, 0],
+      trajectory[0, 1],
+      trajectory[0, 2],
+      simple_name,
+      fontsize=10,
+      fontweight='bold',
+      color='black',
+      ha='center',
+      va='bottom'
     )
   
   # Настройка осей
@@ -83,15 +99,19 @@ def plot_marker_trajectories(frames_data, marker_names, title="Marker Trajectori
   return fig
 
 
-def plot_marker_positions_2d(frames_data, marker_names, frame_idx=0):
+def plot_marker_positions_2d(frames_data, marker_names, simple_names=None, frame_idx=0):
   """
   Создает 2D проекции позиций маркеров для конкретного кадра.
   
   Args:
     frames_data: Массив данных (кадры, маркеры, XYZ)
     marker_names: Список имен маркеров
+    simple_names: Список простых имен (l1, r1 и т.д.)
     frame_idx: Индекс кадра для отображения
   """
+  if simple_names is None:
+    simple_names = marker_names
+    
   # Создаем фигуру с тремя подграфиками (проекции XY, XZ, YZ)
   fig, axes = plt.subplots(1, 3, figsize=(18, 6))
   
@@ -99,10 +119,11 @@ def plot_marker_positions_2d(frames_data, marker_names, frame_idx=0):
   frame_data = frames_data[frame_idx]
   
   # Проекция XY
-  axes[0].scatter(frame_data[:, 0], frame_data[:, 1], s=100, c='red', alpha=0.7)
-  for i, name in enumerate(marker_names):
+  axes[0].scatter(frame_data[:, 0], frame_data[:, 1], s=150, c='red', alpha=0.7, edgecolors='black', linewidths=1.5)
+  for i, name in enumerate(simple_names):
     axes[0].annotate(name, (frame_data[i, 0], frame_data[i, 1]), 
-                    fontsize=8, alpha=0.7)
+                    fontsize=12, fontweight='bold', alpha=0.9,
+                    ha='center', va='bottom')
   axes[0].set_xlabel('X (mm)')
   axes[0].set_ylabel('Y (mm)')
   axes[0].set_title('Проекция XY (вид сверху)')
@@ -110,10 +131,11 @@ def plot_marker_positions_2d(frames_data, marker_names, frame_idx=0):
   axes[0].set_aspect('equal', adjustable='box')
   
   # Проекция XZ
-  axes[1].scatter(frame_data[:, 0], frame_data[:, 2], s=100, c='green', alpha=0.7)
-  for i, name in enumerate(marker_names):
+  axes[1].scatter(frame_data[:, 0], frame_data[:, 2], s=150, c='green', alpha=0.7, edgecolors='black', linewidths=1.5)
+  for i, name in enumerate(simple_names):
     axes[1].annotate(name, (frame_data[i, 0], frame_data[i, 2]), 
-                    fontsize=8, alpha=0.7)
+                    fontsize=12, fontweight='bold', alpha=0.9,
+                    ha='center', va='bottom')
   axes[1].set_xlabel('X (mm)')
   axes[1].set_ylabel('Z (mm)')
   axes[1].set_title('Проекция XZ (вид сбоку)')
@@ -121,10 +143,11 @@ def plot_marker_positions_2d(frames_data, marker_names, frame_idx=0):
   axes[1].set_aspect('equal', adjustable='box')
   
   # Проекция YZ
-  axes[2].scatter(frame_data[:, 1], frame_data[:, 2], s=100, c='blue', alpha=0.7)
-  for i, name in enumerate(marker_names):
+  axes[2].scatter(frame_data[:, 1], frame_data[:, 2], s=150, c='blue', alpha=0.7, edgecolors='black', linewidths=1.5)
+  for i, name in enumerate(simple_names):
     axes[2].annotate(name, (frame_data[i, 1], frame_data[i, 2]), 
-                    fontsize=8, alpha=0.7)
+                    fontsize=12, fontweight='bold', alpha=0.9,
+                    ha='center', va='bottom')
   axes[2].set_xlabel('Y (mm)')
   axes[2].set_ylabel('Z (mm)')
   axes[2].set_title('Проекция YZ (вид спереди)')
@@ -186,6 +209,7 @@ def main():
   fig_traj = plot_marker_trajectories(
     data['frames'],
     data['marker_names'],
+    data.get('simple_names'),
     title=f"Траектории маркеров - {file_path.stem}"
   )
   
@@ -199,6 +223,7 @@ def main():
   fig_proj = plot_marker_positions_2d(
     data['frames'],
     data['marker_names'],
+    data.get('simple_names'),
     frame_idx=args.frame
   )
   

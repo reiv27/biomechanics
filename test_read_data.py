@@ -6,18 +6,42 @@
 
 from visualize_markers import MarkerDataReader
 from pathlib import Path
+import argparse
+import sys
 
 
 def main():
   """Главная функция для тестирования чтения данных."""
   
+  # Парсинг аргументов командной строки
+  parser = argparse.ArgumentParser(
+    description='Проверка чтения данных маркеров из TSV файлов'
+  )
+  parser.add_argument(
+    'files',
+    nargs='*',
+    help='Пути к TSV файлам для проверки (если не указаны, используются файлы по умолчанию)'
+  )
+  
+  args = parser.parse_args()
+  
   project_root = Path(__file__).parent
   
-  # Список файлов для тестирования
-  test_files = [
-    project_root / 'milana' / 'Measurement1.tsv',
-    project_root / 'roma' / 'Measurement1.tsv',
-  ]
+  # Если файлы указаны в аргументах, используем их
+  if args.files:
+    test_files = []
+    for file_path in args.files:
+      path = Path(file_path)
+      # Если путь относительный, делаем его относительно текущей директории
+      if not path.is_absolute():
+        path = Path.cwd() / path
+      test_files.append(path)
+  else:
+    # Список файлов по умолчанию для тестирования
+    test_files = [
+      project_root / 'data' / 'Measurement1.tsv',
+      project_root / 'data' / 'Measurement2.tsv',
+    ]
   
   for file_path in test_files:
     if not file_path.exists():
@@ -39,8 +63,11 @@ def main():
     
     # Выводим информацию о маркерах
     print(f"\n🎯 Маркеры ({len(data['marker_names'])} шт.):")
-    for i, name in enumerate(data['marker_names'][:5]):
-      print(f"  {i+1}. {name}")
+    print("  Простые имена и оригинальные:")
+    for i in range(min(5, len(data['marker_names']))):
+      simple_name = data['simple_names'][i] if 'simple_names' in data else f"m{i+1}"
+      orig_name = data['marker_names'][i]
+      print(f"  {simple_name} ({orig_name})")
     if len(data['marker_names']) > 5:
       print(f"  ... и еще {len(data['marker_names']) - 5}")
     
@@ -52,9 +79,9 @@ def main():
     # Выводим пример первого кадра
     print(f"\n🔍 Первый кадр (первые 3 маркера):")
     for i in range(min(3, len(data['marker_names']))):
-      marker_name = data['marker_names'][i]
+      simple_name = data['simple_names'][i] if 'simple_names' in data else data['marker_names'][i]
       x, y, z = data['frames'][0, i, :]
-      print(f"  {marker_name}:")
+      print(f"  {simple_name}:")
       print(f"    X: {x:8.3f} mm")
       print(f"    Y: {y:8.3f} mm")
       print(f"    Z: {z:8.3f} mm")

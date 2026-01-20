@@ -18,16 +18,20 @@ python3 visualize_markers.py
 
 ### Указание конкретного файла
 ```bash
-python3 visualize_markers.py --file milana/Measurement1.tsv
+# Способ 1: позиционный аргумент (проще)
+python3 visualize_markers.py clear_data/Measurement1.tsv
+
+# Способ 2: с полным путем
+python3 visualize_markers.py /home/user/biomech/clear_data/Measurement1.tsv
 ```
 
 ### Сохранение анимации в файл
 ```bash
 # Сохранить как GIF
-python3 visualize_markers.py --file milana/Measurement1.tsv --save output.gif
+python3 visualize_markers.py clear_data/Measurement1.tsv --save output.gif
 
 # Сохранить как MP4 (требуется ffmpeg)
-python3 visualize_markers.py --file clear_data/Measurement1.tsv --save output.mp4
+python3 visualize_markers.py clear_data/Measurement2.tsv --save output.mp4
 ```
 
 ### Управление скоростью анимации
@@ -41,9 +45,18 @@ python3 visualize_markers.py --interval 20
 
 ### Тестирование чтения данных
 ```bash
+# Проверка файлов по умолчанию
 python3 test_read_data.py
+
+# Проверка конкретного файла
+python3 test_read_data.py clear_data/Measurement1.tsv
+
+# Проверка нескольких файлов
+python3 test_read_data.py clear_data/Measurement1.tsv clear_data/Measurement2.tsv
+
+# С полным путем
+python3 test_read_data.py /path/to/your/data.tsv
 ```
-Выводит информацию о данных без запуска GUI.
 
 ### Создание статических графиков
 ```bash
@@ -72,3 +85,11 @@ TSV файлы содержат:
 - 3D координаты (X, Y, Z) для каждого маркера в каждом кадре
 - Частота захвата: 100 Hz
 - Количество маркеров: 15
+
+## Именование маркеров
+
+Скрипты автоматически:
+1. Фильтруют ненужные маркеры (l1, l5, l6, r2, r5, r8)
+2. Присваивают простые имена оставшимся: **1, 2, 3, 4, 5...**
+
+Подробнее в файле [MARKER_NAMING.md](MARKER_NAMING.md)
