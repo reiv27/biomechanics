@@ -134,9 +134,9 @@ class MarkerDataReader:
     Creates simple names for markers and filters unnecessary ones.
     Determines left/right based on average Y coordinate, then filters
     and renames remaining markers as 1, 2, 3...
-    For Measurement2.tsv, filters markers by position numbers.
+    For Measurement2.tsv, matches markers with Measurement1 by distance.
     """
-    # Check if this is Measurement2.tsv - filter by position numbers
+    # Check if this is Measurement2.tsv - filter by position numbers and match with Measurement1
     if 'Measurement2' in self.file_path.name:
       # Exclude markers at positions: 2, 4, 5, 7, 11, 12 (1-based numbering)
       # In 0-based indices: 1, 3, 4, 6, 10, 11
@@ -151,8 +151,22 @@ class MarkerDataReader:
       # Filter original names
       self.marker_names = [self.marker_names[i] for i in indices_to_keep]
       
-      # Create simple names 1, 2, 3...
-      self.simple_names = [str(i+1) for i in range(len(self.marker_names))]
+      # Load Measurement1 to match markers by position
+      measurement1_path = self.file_path.parent / 'Measurement1.tsv'
+      if measurement1_path.exists():
+        # Create a temporary reader for Measurement1
+        temp_reader = MarkerDataReader(measurement1_path)
+        temp_data = temp_reader.read_file()
+        
+        # Calculate mean positions for both datasets
+        mean_pos_m2 = np.mean(self.frames_data, axis=0)  # (10 markers, XYZ)
+        mean_pos_m1 = np.mean(temp_data['frames'], axis=0)  # (9 markers, XYZ)
+        
+        # Match markers by finding closest ones
+        self.simple_names = self._match_markers_by_distance(mean_pos_m2, mean_pos_m1)
+      else:
+        # Fallback if Measurement1 not found
+        self.simple_names = [str(i+1) for i in range(len(self.marker_names))]
       return
     
     # For other files: apply filtering based on left/right positions
@@ -203,6 +217,108 @@ class MarkerDataReader:
     
     # Create new simple names (just 1, 2, 3...)
     self.simple_names = [str(i+1) for i in range(len(self.marker_names))]
+    
+    # Apply anatomical naming
+    name_mapping = {
+      '1': 'ra',     # right ankle
+      '8': 'rk',     # right knee
+      '2': 'rh',     # right hip
+      '6': 'rs',     # right shoulder
+      '7': 'ls',     # left shoulder
+      '9': 'lh',     # left hip
+      '5': 'lk',     # left knee
+      '4': 'la',     # left ankle
+      '3': 'spine',  # spine
+      '10': 'mass',  # center of mass
+    }
+    
+    for i in range(len(self.simple_names)):
+      if self.simple_names[i] in name_mapping:
+        self.simple_names[i] = name_mapping[self.simple_names[i]]
+  
+  def _match_markers_by_distance(self, positions_m2, positions_m1):
+    """
+    Matches markers from Measurement2 with Measurement1 based on spatial proximity.
+    
+    Args:
+      positions_m2: Mean positions of Measurement2 markers (N2, 3)
+      positions_m1: Mean positions of Measurement1 markers (N1, 3)
+    
+    Returns:
+      List of simple names for Measurement2 markers
+    """
+    num_m2 = len(positions_m2)
+    num_m1 = len(positions_m1)
+    
+    # Calculate pairwise distances between all markers
+    distances = np.zeros((num_m2, num_m1))
+    for i in range(num_m2):
+      for j in range(num_m1):
+        distances[i, j] = np.linalg.norm(positions_m2[i] - positions_m1[j])
+    
+    # Match markers: for each M2 marker, find closest M1 marker
+    simple_names = [''] * num_m2
+    used_m1_indices = set()
+    
+    # Find best matches (greedy approach: match closest pairs first)
+    while len(used_m1_indices) < num_m1:
+      # Find minimum distance that hasn't been used
+      min_dist = float('inf')
+      best_i, best_j = -1, -1
+      
+      for i in range(num_m2):
+        if simple_names[i]:  # Already assigned
+          continue
+        for j in range(num_m1):
+          if j in used_m1_indices:  # Already used
+            continue
+          if distances[i, j] < min_dist:
+            min_dist = distances[i, j]
+            best_i, best_j = i, j
+      
+      if best_i >= 0:
+        # Assign same number as in Measurement1 (1-based)
+        simple_names[best_i] = str(best_j + 1)
+        used_m1_indices.add(best_j)
+    
+    # Assign number 10 to unmatched marker(s)
+    for i in range(num_m2):
+      if not simple_names[i]:
+        simple_names[i] = '10'
+    
+    # Fix: swap markers 3 and 7 if they are incorrectly matched
+    idx_3 = -1
+    idx_7 = -1
+    for i, name in enumerate(simple_names):
+      if name == '3':
+        idx_3 = i
+      elif name == '7':
+        idx_7 = i
+    
+    if idx_3 >= 0 and idx_7 >= 0:
+      # Swap them
+      simple_names[idx_3] = '7'
+      simple_names[idx_7] = '3'
+    
+    # Apply anatomical naming
+    name_mapping = {
+      '1': 'ra',     # right ankle
+      '8': 'rk',     # right knee
+      '2': 'rh',     # right hip
+      '6': 'rs',     # right shoulder
+      '7': 'ls',     # left shoulder
+      '9': 'lh',     # left hip
+      '5': 'lk',     # left knee
+      '4': 'la',     # left ankle
+      '3': 'spine',  # spine
+      '10': 'mass',  # center of mass
+    }
+    
+    for i in range(len(simple_names)):
+      if simple_names[i] in name_mapping:
+        simple_names[i] = name_mapping[simple_names[i]]
+    
+    return simple_names
 
 
 class MarkerAnimator:

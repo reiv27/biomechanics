@@ -17,7 +17,7 @@ python3 visualize_markers.py data/Measurement1.tsv
 ```
 
 **Display:**
-- 9 marker points labeled 1 to 9
+- 9 marker points with anatomical labels (ra, rh, la, lk, etc.)
 - 3D animation of movement
 - Labels move with markers
 
@@ -75,17 +75,32 @@ Displays marker information, metadata and statistics.
 - **Measurement1.tsv**: 9 markers (filtered from 15)
 - **Measurement2.tsv**: 10 markers (filtered from 16)
 
-## Numbering System
+## Marker Naming System
+
+Markers use anatomical abbreviations:
+
+- **ra** - Right Ankle
+- **rk** - Right Knee
+- **rh** - Right Hip
+- **rs** - Right Shoulder
+- **ls** - Left Shoulder
+- **lh** - Left Hip
+- **lk** - Left Knee
+- **la** - Left Ankle
+- **spine** - Spine marker
+- **mass** - Center of mass marker
 
 ### Measurement1.tsv
-Markers are automatically filtered and numbered as **1, 2, 3, 4, 5, 6, 7, 8, 9**.
+9 markers (filtered from 15): **ra, rh, spine, la, lk, rs, ls, rk, lh**
 
 Excluded markers: l1, l5, l6, r2, r5, r8 (determined automatically by positions).
 
 ### Measurement2.tsv
-Markers are filtered by position and numbered as **1, 2, 3, 4, 5, 6, 7, 8, 9, 10**.
+10 markers (filtered from 16): **spine, lk, mass, rh, ls, rs, ra, la, rk, lh**
 
 Excluded markers at positions: 2, 4, 5, 7, 11, 12 (from original 16 markers).
+
+**Note:** Marker naming is synchronized between datasets by comparing spatial coordinates. All markers have anatomical labels.
 
 ## Help
 
