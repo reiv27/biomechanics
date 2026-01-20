@@ -134,7 +134,28 @@ class MarkerDataReader:
     Creates simple names for markers and filters unnecessary ones.
     Determines left/right based on average Y coordinate, then filters
     and renames remaining markers as 1, 2, 3...
+    For Measurement2.tsv, filters markers by position numbers.
     """
+    # Check if this is Measurement2.tsv - filter by position numbers
+    if 'Measurement2' in self.file_path.name:
+      # Exclude markers at positions: 2, 4, 5, 7, 11, 12 (1-based numbering)
+      # In 0-based indices: 1, 3, 4, 6, 10, 11
+      indices_to_exclude = {1, 3, 4, 6, 10, 11}
+      
+      # Keep all other markers
+      indices_to_keep = [i for i in range(len(self.marker_names)) if i not in indices_to_exclude]
+      
+      # Filter marker data
+      self.frames_data = self.frames_data[:, indices_to_keep, :]
+      
+      # Filter original names
+      self.marker_names = [self.marker_names[i] for i in indices_to_keep]
+      
+      # Create simple names 1, 2, 3...
+      self.simple_names = [str(i+1) for i in range(len(self.marker_names))]
+      return
+    
+    # For other files: apply filtering based on left/right positions
     # Calculate average position of each marker across all frames
     mean_positions = np.mean(self.frames_data, axis=0)  # (markers, XYZ)
     

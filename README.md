@@ -69,14 +69,23 @@ Displays marker information, metadata and statistics.
 - **Folder data/** - marker data files
 - **Format:** TSV (tab-separated values)
 - **Frequency:** 100 Hz
-- **Markers:** 9 (automatically filtered from 15)
 - **Frames:** 2000 (20 seconds recording)
+
+### Files:
+- **Measurement1.tsv**: 9 markers (filtered from 15)
+- **Measurement2.tsv**: 10 markers (filtered from 16)
 
 ## Numbering System
 
+### Measurement1.tsv
 Markers are automatically filtered and numbered as **1, 2, 3, 4, 5, 6, 7, 8, 9**.
 
 Excluded markers: l1, l5, l6, r2, r5, r8 (determined automatically by positions).
+
+### Measurement2.tsv
+Markers are filtered by position and numbered as **1, 2, 3, 4, 5, 6, 7, 8, 9, 10**.
+
+Excluded markers at positions: 2, 4, 5, 7, 11, 12 (from original 16 markers).
 
 ## Help
 
