@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Скрипт для создания статических графиков траекторий маркеров.
-Полезно для быстрого анализа данных без запуска полной анимации.
+Script for creating static plots of marker trajectories.
+Useful for quick data analysis without running full animation.
 """
 
 import numpy as np
@@ -13,29 +13,29 @@ import argparse
 
 def plot_marker_trajectories(frames_data, marker_names, simple_names=None, title="Marker Trajectories"):
   """
-  Создает график траекторий всех маркеров в 3D.
+  Creates 3D plot of all marker trajectories.
   
   Args:
-    frames_data: Массив данных (кадры, маркеры, XYZ)
-    marker_names: Список имен маркеров
-    simple_names: Список простых имен (l1, r1 и т.д.)
-    title: Заголовок графика
+    frames_data: Data array (frames, markers, XYZ)
+    marker_names: List of marker names
+    simple_names: List of simple names (l1, r1, etc.)
+    title: Plot title
   """
   if simple_names is None:
     simple_names = marker_names
-  # Создаем фигуру с 3D графиком
+  # Create figure with 3D plot
   fig = plt.figure(figsize=(14, 10))
   ax = fig.add_subplot(111, projection='3d')
   
-  # Генерируем цвета для каждого маркера
+  # Generate colors for each marker
   colors = plt.cm.rainbow(np.linspace(0, 1, len(marker_names)))
   
-  # Рисуем траекторию для каждого маркера
+  # Draw trajectory for each marker
   for marker_idx, (simple_name, color) in enumerate(zip(simple_names, colors)):
-    # Извлекаем траекторию маркера (все кадры)
+    # Extract marker trajectory (all frames)
     trajectory = frames_data[:, marker_idx, :]
     
-    # Рисуем линию траектории
+    # Draw trajectory line
     ax.plot(
       trajectory[:, 0],
       trajectory[:, 1],
@@ -46,7 +46,7 @@ def plot_marker_trajectories(frames_data, marker_names, simple_names=None, title
       label=simple_name
     )
     
-    # Отмечаем начальную позицию с подписью
+    # Mark initial position with label
     ax.scatter(
       trajectory[0, 0],
       trajectory[0, 1],
@@ -58,7 +58,7 @@ def plot_marker_trajectories(frames_data, marker_names, simple_names=None, title
       linewidths=2
     )
     
-    # Добавляем подпись рядом с начальной позицией
+    # Add label near initial position
     ax.text(
       trajectory[0, 0],
       trajectory[0, 1],
@@ -71,17 +71,17 @@ def plot_marker_trajectories(frames_data, marker_names, simple_names=None, title
       va='bottom'
     )
   
-  # Настройка осей
+  # Configure axes
   ax.set_xlabel('X (mm)')
   ax.set_ylabel('Y (mm)')
   ax.set_zlabel('Z (mm)')
   ax.set_title(title)
   
-  # Добавляем легенду (только первые 8 маркеров, чтобы не загромождать)
+  # Add legend (only first 8 markers to avoid clutter)
   if len(marker_names) <= 8:
     ax.legend(loc='upper right', fontsize=8)
   
-  # Устанавливаем одинаковый масштаб для всех осей
+  # Set equal scale for all axes
   max_range = np.array([
     frames_data[:, :, 0].max() - frames_data[:, :, 0].min(),
     frames_data[:, :, 1].max() - frames_data[:, :, 1].min(),
@@ -101,24 +101,24 @@ def plot_marker_trajectories(frames_data, marker_names, simple_names=None, title
 
 def plot_marker_positions_2d(frames_data, marker_names, simple_names=None, frame_idx=0):
   """
-  Создает 2D проекции позиций маркеров для конкретного кадра.
+  Creates 2D projections of marker positions for specific frame.
   
   Args:
-    frames_data: Массив данных (кадры, маркеры, XYZ)
-    marker_names: Список имен маркеров
-    simple_names: Список простых имен (l1, r1 и т.д.)
-    frame_idx: Индекс кадра для отображения
+    frames_data: Data array (frames, markers, XYZ)
+    marker_names: List of marker names
+    simple_names: List of simple names (l1, r1, etc.)
+    frame_idx: Frame index to display
   """
   if simple_names is None:
     simple_names = marker_names
     
-  # Создаем фигуру с тремя подграфиками (проекции XY, XZ, YZ)
+  # Create figure with three subplots (XY, XZ, YZ projections)
   fig, axes = plt.subplots(1, 3, figsize=(18, 6))
   
-  # Извлекаем данные для указанного кадра
+  # Extract data for specified frame
   frame_data = frames_data[frame_idx]
   
-  # Проекция XY
+  # XY projection
   axes[0].scatter(frame_data[:, 0], frame_data[:, 1], s=150, c='red', alpha=0.7, edgecolors='black', linewidths=1.5)
   for i, name in enumerate(simple_names):
     axes[0].annotate(name, (frame_data[i, 0], frame_data[i, 1]), 
@@ -126,11 +126,11 @@ def plot_marker_positions_2d(frames_data, marker_names, simple_names=None, frame
                     ha='center', va='bottom')
   axes[0].set_xlabel('X (mm)')
   axes[0].set_ylabel('Y (mm)')
-  axes[0].set_title('Проекция XY (вид сверху)')
+  axes[0].set_title('XY Projection (top view)')
   axes[0].grid(True, alpha=0.3)
   axes[0].set_aspect('equal', adjustable='box')
   
-  # Проекция XZ
+  # XZ projection
   axes[1].scatter(frame_data[:, 0], frame_data[:, 2], s=150, c='green', alpha=0.7, edgecolors='black', linewidths=1.5)
   for i, name in enumerate(simple_names):
     axes[1].annotate(name, (frame_data[i, 0], frame_data[i, 2]), 
@@ -138,11 +138,11 @@ def plot_marker_positions_2d(frames_data, marker_names, simple_names=None, frame
                     ha='center', va='bottom')
   axes[1].set_xlabel('X (mm)')
   axes[1].set_ylabel('Z (mm)')
-  axes[1].set_title('Проекция XZ (вид сбоку)')
+  axes[1].set_title('XZ Projection (side view)')
   axes[1].grid(True, alpha=0.3)
   axes[1].set_aspect('equal', adjustable='box')
   
-  # Проекция YZ
+  # YZ projection
   axes[2].scatter(frame_data[:, 1], frame_data[:, 2], s=150, c='blue', alpha=0.7, edgecolors='black', linewidths=1.5)
   for i, name in enumerate(simple_names):
     axes[2].annotate(name, (frame_data[i, 1], frame_data[i, 2]), 
@@ -150,76 +150,76 @@ def plot_marker_positions_2d(frames_data, marker_names, simple_names=None, frame
                     ha='center', va='bottom')
   axes[2].set_xlabel('Y (mm)')
   axes[2].set_ylabel('Z (mm)')
-  axes[2].set_title('Проекция YZ (вид спереди)')
+  axes[2].set_title('YZ Projection (front view)')
   axes[2].grid(True, alpha=0.3)
   axes[2].set_aspect('equal', adjustable='box')
   
-  fig.suptitle(f'Позиции маркеров - Кадр {frame_idx + 1}', fontsize=14)
+  fig.suptitle(f'Marker Positions - Frame {frame_idx + 1}', fontsize=14)
   fig.tight_layout()
   
   return fig
 
 
 def main():
-  """Главная функция."""
-  # Парсинг аргументов
+  """Main function."""
+  # Parse arguments
   parser = argparse.ArgumentParser(
-    description='Создание статических графиков траекторий маркеров'
+    description='Create static plots of marker trajectories'
   )
   parser.add_argument(
     'file',
     type=str,
-    help='Путь к TSV файлу с данными маркеров'
+    help='Path to TSV file with marker data'
   )
   parser.add_argument(
     '--frame',
     type=int,
     default=0,
-    help='Номер кадра для 2D проекций (по умолчанию: 0)'
+    help='Frame number for 2D projections (default: 0)'
   )
   parser.add_argument(
     '--save-trajectories',
     type=str,
-    help='Сохранить график траекторий в файл'
+    help='Save trajectory plot to file'
   )
   parser.add_argument(
     '--save-projections',
     type=str,
-    help='Сохранить 2D проекции в файл'
+    help='Save 2D projections to file'
   )
   
   args = parser.parse_args()
   
-  # Путь к файлу
+  # File path
   file_path = Path(args.file)
   if not file_path.exists():
-    print(f"❌ Ошибка: Файл {file_path} не найден!")
+    print(f"❌ Error: File {file_path} not found!")
     return
   
-  print(f"📂 Чтение файла: {file_path}")
+  print(f"📂 Reading file: {file_path}")
   
-  # Читаем данные
+  # Read data
   reader = MarkerDataReader(file_path)
   data = reader.read_file()
   
-  print(f"✅ Прочитано {len(data['frames'])} кадров, {len(data['marker_names'])} маркеров")
+  print(f"✅ Read {len(data['frames'])} frames, {len(data['marker_names'])} markers")
   
-  # Создаем график траекторий
-  print("\n🎨 Создание графика траекторий...")
+  # Create trajectory plot
+  print("\n🎨 Creating trajectory plot...")
   fig_traj = plot_marker_trajectories(
     data['frames'],
     data['marker_names'],
     data.get('simple_names'),
-    title=f"Траектории маркеров - {file_path.stem}"
+    title=f"Marker Trajectories - {file_path.stem}"
   )
   
   if args.save_trajectories:
-    print(f"💾 Сохранение графика траекторий: {args.save_trajectories}")
+    print(f"💾 Saving trajectory plot: {args.save_trajectories}")
     fig_traj.savefig(args.save_trajectories, dpi=150, bbox_inches='tight')
-    print(f"✅ Сохранено: {args.save_trajectories}")
+    print(f"✅ Saved: {args.save_trajectories}")
   
-  # Создаем 2D проекции
-  print(f"\n🎨 Создание 2D проекций для кадра {args.frame + 1}...")
+  # Create 2D projections
+  print(f"\n🎨 Creating 2D projections for frame {args.frame + 1}...")
   fig_proj = plot_marker_positions_2d(
     data['frames'],
     data['marker_names'],
@@ -228,19 +228,19 @@ def main():
   )
   
   if args.save_projections:
-    print(f"💾 Сохранение 2D проекций: {args.save_projections}")
+    print(f"💾 Saving 2D projections: {args.save_projections}")
     fig_proj.savefig(args.save_projections, dpi=150, bbox_inches='tight')
-    print(f"✅ Сохранено: {args.save_projections}")
+    print(f"✅ Saved: {args.save_projections}")
   
-  # Показываем графики, если не сохраняем
+  # Display plots if not saving
   if not args.save_trajectories and not args.save_projections:
-    print("\n📊 Отображение графиков...")
+    print("\n📊 Displaying plots...")
     plt.show()
   elif not args.save_trajectories or not args.save_projections:
-    print("\n📊 Отображение графиков...")
+    print("\n📊 Displaying plots...")
     plt.show()
   
-  print("\n✅ Готово!")
+  print("\n✅ Done!")
 
 
 if __name__ == "__main__":

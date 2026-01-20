@@ -1,95 +1,86 @@
-# Biomech - Визуализация данных захвата движения
+# Motion Capture Data Visualization
 
-Проект для чтения и визуализации данных маркеров из системы захвата движения Qualisys.
+Scripts for visualizing marker data from Qualisys motion capture system.
 
-## Установка зависимостей
+## Installation
 
 ```bash
 pip install -r requirements.txt
 ```
 
-## Запуск
+## Usage
 
-### Интерактивный режим
+### 3D Animation Viewer
+
 ```bash
-python3 visualize_markers.py
-```
-Скрипт предложит выбрать файл для визуализации из доступных вариантов.
-
-### Указание конкретного файла
-```bash
-# Способ 1: позиционный аргумент (проще)
-python3 visualize_markers.py clear_data/Measurement1.tsv
-
-# Способ 2: с полным путем
-python3 visualize_markers.py /home/user/biomech/clear_data/Measurement1.tsv
+python3 visualize_markers.py data/Measurement1.tsv
 ```
 
-### Сохранение анимации в файл
-```bash
-# Сохранить как GIF
-python3 visualize_markers.py clear_data/Measurement1.tsv --save output.gif
+**Display:**
+- 9 marker points labeled 1 to 9
+- 3D animation of movement
+- Labels move with markers
 
-# Сохранить как MP4 (требуется ffmpeg)
-python3 visualize_markers.py clear_data/Measurement2.tsv --save output.mp4
+**Parameters:**
+
+```bash
+# Speed up animation (show every 5th frame)
+python3 visualize_markers.py data/Measurement1.tsv --skip-frames 5
+
+# Slow down animation (50 ms interval between frames)
+python3 visualize_markers.py data/Measurement1.tsv --interval 50
+
+# Save as GIF
+python3 visualize_markers.py data/Measurement1.tsv --save animation.gif
+
+# Save as MP4 (requires ffmpeg)
+python3 visualize_markers.py data/Measurement1.tsv --save animation.mp4
 ```
 
-### Управление скоростью анимации
+### Static Plots
+
 ```bash
-# Показывать каждый 2-й кадр (ускорение в 2 раза)
-python3 visualize_markers.py --skip-frames 2
+# Display plots
+python3 plot_markers_static.py data/Measurement1.tsv
 
-# Изменить интервал между кадрами (мс)
-python3 visualize_markers.py --interval 20
-```
-
-### Тестирование чтения данных
-```bash
-# Проверка файлов по умолчанию
-python3 test_read_data.py
-
-# Проверка конкретного файла
-python3 test_read_data.py clear_data/Measurement1.tsv
-
-# Проверка нескольких файлов
-python3 test_read_data.py clear_data/Measurement1.tsv clear_data/Measurement2.tsv
-
-# С полным путем
-python3 test_read_data.py /path/to/your/data.tsv
-```
-
-### Создание статических графиков
-```bash
-# Показать траектории и 2D проекции
-python3 plot_markers_static.py milana/Measurement1.tsv
-
-# Сохранить графики в файлы
-python3 plot_markers_static.py milana/Measurement1.tsv \
+# Save to files
+python3 plot_markers_static.py data/Measurement1.tsv \
   --save-trajectories trajectories.png \
   --save-projections projections.png
 
-# Показать 2D проекции для конкретного кадра
-python3 plot_markers_static.py clear_data/Measurement1.tsv --frame 100
+# Show specific frame
+python3 plot_markers_static.py data/Measurement1.tsv --frame 500
 ```
 
-## Структура данных
+**Output:**
+- 3D trajectories of all markers
+- 2D projections (XY, XZ, YZ)
 
-- `milana/` - данные захвата движения субъекта Milana (3D координаты маркеров)
-- `clear_data/` - данные захвата движения субъекта Roman Eidelman (3D координаты маркеров)
-- `Milana/` - обработанные угловые данные для обоих субъектов
+### Data Verification
 
-## Формат файлов
+```bash
+python3 test_read_data.py data/Measurement1.tsv
+```
 
-TSV файлы содержат:
-- Метаданные (количество кадров, частота, количество маркеров)
-- 3D координаты (X, Y, Z) для каждого маркера в каждом кадре
-- Частота захвата: 100 Hz
-- Количество маркеров: 15
+Displays marker information, metadata and statistics.
 
-## Именование маркеров
+## Data
 
-Скрипты автоматически:
-1. Фильтруют ненужные маркеры (l1, l5, l6, r2, r5, r8)
-2. Присваивают простые имена оставшимся: **1, 2, 3, 4, 5...**
+- **Folder data/** - marker data files
+- **Format:** TSV (tab-separated values)
+- **Frequency:** 100 Hz
+- **Markers:** 9 (automatically filtered from 15)
+- **Frames:** 2000 (20 seconds recording)
 
-Подробнее в файле [MARKER_NAMING.md](MARKER_NAMING.md)
+## Numbering System
+
+Markers are automatically filtered and numbered as **1, 2, 3, 4, 5, 6, 7, 8, 9**.
+
+Excluded markers: l1, l5, l6, r2, r5, r8 (determined automatically by positions).
+
+## Help
+
+For any script:
+```bash
+python3 visualize_markers.py --help
+```

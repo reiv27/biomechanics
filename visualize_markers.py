@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Скрипт для чтения и визуализации данных маркеров захвата движения.
-Читает TSV файлы из папок clear_data/ и milana/ и создает 3D анимацию.
+Script for reading and visualizing motion capture marker data.
+Reads TSV files from data folders and creates 3D animation.
 """
 
 import numpy as np
@@ -12,48 +12,48 @@ from typing import Dict, Tuple, List
 
 
 class MarkerDataReader:
-  """Класс для чтения данных маркеров из TSV файлов."""
+  """Class for reading marker data from TSV files."""
   
   def __init__(self, file_path: str):
     """
-    Инициализация ридера.
+    Initialize the reader.
     
     Args:
-      file_path: Путь к TSV файлу с данными маркеров
+      file_path: Path to TSV file with marker data
     """
     self.file_path = Path(file_path)
     self.metadata = {}
     self.marker_names = []
-    self.simple_names = []  # Простые имена типа r1, l1
+    self.simple_names = []  # Simple names like r1, l1
     self.frames_data = None
     
   def read_file(self) -> Dict:
     """
-    Читает TSV файл и извлекает метаданные и данные маркеров.
+    Reads TSV file and extracts metadata and marker data.
     
     Returns:
-      Словарь с метаданными и данными маркеров
+      Dictionary with metadata and marker data
     """
     with open(self.file_path, 'r') as f:
       lines = f.readlines()
     
-    # Парсим метаданные (первые строки до строки с заголовками)
+    # Parse metadata (first lines before header line)
     data_start_line = 0
     for i, line in enumerate(lines):
       if line.startswith('Frame\t'):
-        # Нашли строку с заголовками столбцов
+        # Found the column headers line
         data_start_line = i + 1
-        # Извлекаем имена маркеров из заголовка
+        # Extract marker names from header
         self._parse_marker_names(lines[i])
         break
       else:
-        # Парсим метаданные
+        # Parse metadata
         self._parse_metadata_line(line)
     
-    # Читаем данные маркеров начиная со строки data_start_line
+    # Read marker data starting from data_start_line
     self._parse_marker_data(lines[data_start_line:])
     
-    # Создаем простые имена маркеров (l1, l2, r1, r2 и т.д.)
+    # Create simple marker names (l1, l2, r1, r2, etc.)
     self._create_simple_names()
     
     return {
@@ -65,10 +65,10 @@ class MarkerDataReader:
   
   def _parse_metadata_line(self, line: str):
     """
-    Парсит строку метаданных.
+    Parses a metadata line.
     
     Args:
-      line: Строка с метаданными в формате "KEY\tVALUE"
+      line: Metadata line in format "KEY\tVALUE"
     """
     parts = line.strip().split('\t')
     if len(parts) >= 2:
@@ -78,19 +78,19 @@ class MarkerDataReader:
   
   def _parse_marker_names(self, header_line: str):
     """
-    Извлекает имена маркеров из строки заголовков.
+    Extracts marker names from header line.
     
     Args:
-      header_line: Строка с заголовками столбцов
+      header_line: Line with column headers
     """
-    # Разбиваем строку по табуляции
+    # Split by tab
     columns = header_line.strip().split('\t')
     
-    # Пропускаем "Frame" и "Time", остальное - координаты маркеров
-    # Формат: "MarkerName X", "MarkerName Y", "MarkerName Z"
+    # Skip "Frame" and "Time", rest are marker coordinates
+    # Format: "MarkerName X", "MarkerName Y", "MarkerName Z"
     marker_set = []
-    for col in columns[2:]:  # Пропускаем Frame и Time
-      # Убираем суффиксы X, Y, Z
+    for col in columns[2:]:  # Skip Frame and Time
+      # Remove X, Y, Z suffixes
       marker_name = col.rsplit(' ', 1)[0]
       if marker_name not in marker_set:
         marker_set.append(marker_name)
@@ -99,31 +99,31 @@ class MarkerDataReader:
   
   def _parse_marker_data(self, data_lines: List[str]):
     """
-    Парсит данные маркеров из строк файла.
+    Parses marker data from file lines.
     
     Args:
-      data_lines: Список строк с данными кадров
+      data_lines: List of lines with frame data
     """
     num_markers = len(self.marker_names)
     num_frames = len(data_lines)
     
-    # Создаем массив для хранения данных: (кадры, маркеры, координаты XYZ)
+    # Create array to store data: (frames, markers, XYZ coordinates)
     self.frames_data = np.zeros((num_frames, num_markers, 3))
     
     for frame_idx, line in enumerate(data_lines):
-      # Разбиваем строку по табуляции
+      # Split by tab
       values = line.strip().split('\t')
       
-      # Пропускаем Frame и Time (первые два столбца)
+      # Skip Frame and Time (first two columns)
       coords = values[2:]
       
-      # Заполняем координаты для каждого маркера
+      # Fill coordinates for each marker
       for marker_idx in range(num_markers):
         x_idx = marker_idx * 3
         y_idx = marker_idx * 3 + 1
         z_idx = marker_idx * 3 + 2
         
-        # Конвертируем строки в числа
+        # Convert strings to numbers
         if x_idx < len(coords) and y_idx < len(coords) and z_idx < len(coords):
           self.frames_data[frame_idx, marker_idx, 0] = float(coords[x_idx])
           self.frames_data[frame_idx, marker_idx, 1] = float(coords[y_idx])
@@ -131,17 +131,17 @@ class MarkerDataReader:
   
   def _create_simple_names(self):
     """
-    Создает простые имена для маркеров и фильтрует ненужные.
-    Определяет лево/право на основе средней координаты Y, затем фильтрует
-    и переименовывает оставшиеся маркеры как 1, 2, 3...
+    Creates simple names for markers and filters unnecessary ones.
+    Determines left/right based on average Y coordinate, then filters
+    and renames remaining markers as 1, 2, 3...
     """
-    # Вычисляем среднюю позицию каждого маркера по всем кадрам
-    mean_positions = np.mean(self.frames_data, axis=0)  # (маркеры, XYZ)
+    # Calculate average position of each marker across all frames
+    mean_positions = np.mean(self.frames_data, axis=0)  # (markers, XYZ)
     
-    # Определяем центр по Y-координате
+    # Determine center by Y-coordinate
     center_y = np.mean(mean_positions[:, 1])
     
-    # Разделяем маркеры на левые (Y < center_y) и правые (Y >= center_y)
+    # Split markers into left (Y < center_y) and right (Y >= center_y)
     left_markers = []
     right_markers = []
     
@@ -152,11 +152,11 @@ class MarkerDataReader:
       else:
         right_markers.append((idx, marker_y))
     
-    # Сортируем по Y-координате (от меньшего к большему)
+    # Sort by Y-coordinate (from smaller to larger)
     left_markers.sort(key=lambda x: x[1])
     right_markers.sort(key=lambda x: x[1])
     
-    # Создаем временный словарь для маппинга индекса маркера -> временное имя (l1, r1...)
+    # Create temporary dictionary for mapping marker index -> temporary name (l1, r1...)
     temp_name_map = {}
     
     for i, (marker_idx, _) in enumerate(left_markers):
@@ -165,38 +165,38 @@ class MarkerDataReader:
     for i, (marker_idx, _) in enumerate(right_markers):
       temp_name_map[marker_idx] = f'r{i+1}'
     
-    # Список маркеров для исключения
+    # List of markers to exclude
     markers_to_exclude = ['l1', 'l6', 'l5', 'r5', 'r8', 'r2']
     
-    # Определяем индексы маркеров, которые нужно оставить
+    # Determine indices of markers to keep
     indices_to_keep = []
     for idx in range(len(self.marker_names)):
       if temp_name_map[idx] not in markers_to_exclude:
         indices_to_keep.append(idx)
     
-    # Фильтруем данные маркеров
+    # Filter marker data
     self.frames_data = self.frames_data[:, indices_to_keep, :]
     
-    # Фильтруем оригинальные имена
+    # Filter original names
     self.marker_names = [self.marker_names[i] for i in indices_to_keep]
     
-    # Создаем новые простые имена (просто 1, 2, 3...)
+    # Create new simple names (just 1, 2, 3...)
     self.simple_names = [str(i+1) for i in range(len(self.marker_names))]
 
 
 class MarkerAnimator:
-  """Класс для создания 3D анимации маркеров."""
+  """Class for creating 3D marker animation."""
   
   def __init__(self, frames_data: np.ndarray, marker_names: List[str], 
                simple_names: List[str] = None, title: str = "Marker Animation"):
     """
-    Инициализация аниматора.
+    Initialize animator.
     
     Args:
-      frames_data: Массив данных маркеров (кадры, маркеры, XYZ)
-      marker_names: Список имен маркеров
-      simple_names: Список простых имен маркеров (l1, r1 и т.д.)
-      title: Заголовок анимации
+      frames_data: Marker data array (frames, markers, XYZ)
+      marker_names: List of marker names
+      simple_names: List of simple marker names (l1, r1, etc.)
+      title: Animation title
     """
     self.frames_data = frames_data
     self.marker_names = marker_names
@@ -205,20 +205,20 @@ class MarkerAnimator:
     self.fig = None
     self.ax = None
     self.scatter = None
-    self.labels = []  # Текстовые подписи для маркеров
+    self.labels = []  # Text labels for markers
     
   def setup_plot(self):
-    """Настраивает 3D график для анимации."""
-    # Создаем фигуру и 3D оси
+    """Sets up 3D plot for animation."""
+    # Create figure and 3D axes
     self.fig = plt.figure(figsize=(12, 9))
     self.ax = self.fig.add_subplot(111, projection='3d')
     
-    # Вычисляем границы для осей (используем все кадры)
+    # Calculate axis boundaries (using all frames)
     all_x = self.frames_data[:, :, 0].flatten()
     all_y = self.frames_data[:, :, 1].flatten()
     all_z = self.frames_data[:, :, 2].flatten()
     
-    # Устанавливаем одинаковый масштаб для всех осей
+    # Set equal scale for all axes
     max_range = np.array([
       all_x.max() - all_x.min(),
       all_y.max() - all_y.min(),
@@ -233,13 +233,13 @@ class MarkerAnimator:
     self.ax.set_ylim(mid_y - max_range, mid_y + max_range)
     self.ax.set_zlim(mid_z - max_range, mid_z + max_range)
     
-    # Подписи осей
+    # Axis labels
     self.ax.set_xlabel('X (mm)')
     self.ax.set_ylabel('Y (mm)')
     self.ax.set_zlabel('Z (mm)')
     self.ax.set_title(self.title)
     
-    # Создаем начальный scatter plot (первый кадр)
+    # Create initial scatter plot (first frame)
     first_frame = self.frames_data[0]
     self.scatter = self.ax.scatter(
       first_frame[:, 0],
@@ -253,7 +253,7 @@ class MarkerAnimator:
       linewidths=1.5
     )
     
-    # Добавляем подписи для каждого маркера
+    # Add labels for each marker
     self.labels = []
     for i, (x, y, z) in enumerate(first_frame):
       label = self.ax.text(
@@ -271,46 +271,46 @@ class MarkerAnimator:
   
   def update_frame(self, frame_num: int):
     """
-    Обновляет позиции маркеров для текущего кадра.
+    Updates marker positions for current frame.
     
     Args:
-      frame_num: Номер кадра для отображения
+      frame_num: Frame number to display
     """
-    # Получаем данные для текущего кадра
+    # Get data for current frame
     current_frame = self.frames_data[frame_num]
     
-    # Обновляем позиции точек
+    # Update point positions
     self.scatter._offsets3d = (
       current_frame[:, 0],
       current_frame[:, 1],
       current_frame[:, 2]
     )
     
-    # Обновляем позиции подписей
+    # Update label positions
     for i, (x, y, z) in enumerate(current_frame):
       self.labels[i].set_position((x, y))
       self.labels[i].set_3d_properties(z, 'z')
     
-    # Обновляем заголовок с номером кадра
+    # Update title with frame number
     self.ax.set_title(f'{self.title} - Frame {frame_num + 1}/{len(self.frames_data)}')
     
     return [self.scatter] + self.labels
   
   def animate(self, interval: int = 10, skip_frames: int = 1):
     """
-    Запускает анимацию.
+    Runs the animation.
     
     Args:
-      interval: Интервал между кадрами в миллисекундах
-      skip_frames: Количество кадров для пропуска (для ускорения)
+      interval: Interval between frames in milliseconds
+      skip_frames: Number of frames to skip (for speed up)
     
     Returns:
-      Объект анимации
+      Animation object
     """
-    # Настраиваем график
+    # Set up the plot
     self.setup_plot()
     
-    # Создаем анимацию
+    # Create animation
     num_frames = len(self.frames_data)
     frames_to_show = range(0, num_frames, skip_frames)
     
@@ -327,67 +327,67 @@ class MarkerAnimator:
 
 
 def main():
-  """Главная функция для запуска визуализации."""
+  """Main function to run visualization."""
   import argparse
   
-  # Парсинг аргументов командной строки
+  # Parse command line arguments
   parser = argparse.ArgumentParser(
-    description='Визуализация данных маркеров захвата движения'
+    description='Motion capture marker data visualization'
   )
   parser.add_argument(
     'file',
     nargs='?',
     type=str,
-    help='Путь к TSV файлу (если не указан, будет интерактивный выбор)'
+    help='Path to TSV file (if not specified, interactive selection)'
   )
   parser.add_argument(
     '--save',
     type=str,
-    help='Сохранить анимацию в файл (например: output.gif или output.mp4)'
+    help='Save animation to file (e.g.: output.gif or output.mp4)'
   )
   parser.add_argument(
     '--skip-frames',
     type=int,
     default=1,
-    help='Пропускать каждые N кадров для ускорения (по умолчанию: 1)'
+    help='Skip every N frames for speed up (default: 1)'
   )
   parser.add_argument(
     '--interval',
     type=int,
     default=10,
-    help='Интервал между кадрами в мс (по умолчанию: 10)'
+    help='Interval between frames in ms (default: 10)'
   )
   
   args = parser.parse_args()
   
-  # Путь к корневой директории проекта
+  # Path to project root directory
   project_root = Path(__file__).parent
   
-  # Если файл указан через аргумент
+  # If file specified via argument
   if args.file:
     selected_file = Path(args.file)
-    # Если путь относительный, проверяем относительно текущей директории
+    # If relative path, check relative to current directory
     if not selected_file.is_absolute():
-      # Сначала проверим относительно текущей директории
+      # First check relative to current directory
       if (Path.cwd() / selected_file).exists():
         selected_file = Path.cwd() / selected_file
       else:
-        # Если не нашли, пробуем относительно директории проекта
+        # If not found, try relative to project directory
         selected_file = project_root / selected_file
   else:
-    # Список файлов для визуализации
+    # List of files for visualization
     files_to_visualize = [
       project_root / 'milana' / 'Measurement1.tsv',
       project_root / 'data' / 'Measurement1.tsv',
     ]
     
-    # Выбираем файл для визуализации
-    print("Доступные файлы для визуализации:")
+    # Select file for visualization
+    print("Available files for visualization:")
     for idx, file_path in enumerate(files_to_visualize):
       print(f"{idx + 1}. {file_path.relative_to(project_root)}")
     
-    # Запрашиваем выбор пользователя
-    choice = input("\nВыберите номер файла (или нажмите Enter для первого): ").strip()
+    # Request user choice
+    choice = input("\nSelect file number (or press Enter for first): ").strip()
     
     if choice == "":
       selected_idx = 0
@@ -395,41 +395,41 @@ def main():
       try:
         selected_idx = int(choice) - 1
         if selected_idx < 0 or selected_idx >= len(files_to_visualize):
-          print("Неверный выбор. Используем первый файл.")
+          print("Invalid choice. Using first file.")
           selected_idx = 0
       except ValueError:
-        print("Неверный ввод. Используем первый файл.")
+        print("Invalid input. Using first file.")
         selected_idx = 0
     
     selected_file = files_to_visualize[selected_idx]
   
-  # Проверяем существование файла
+  # Check file existence
   if not selected_file.exists():
-    print(f"Ошибка: Файл {selected_file} не найден!")
+    print(f"Error: File {selected_file} not found!")
     return
   
-  print(f"\nЧтение файла: {selected_file}")
+  print(f"\nReading file: {selected_file}")
   
-  # Читаем данные маркеров
+  # Read marker data
   reader = MarkerDataReader(selected_file)
   data = reader.read_file()
   
-  # Выводим информацию о данных
+  # Display data information
   print(f"\n{'='*60}")
-  print(f"📊 Метаданные:")
-  print(f"  Количество кадров: {data['metadata'].get('NO_OF_FRAMES', 'N/A')}")
-  print(f"  Количество маркеров: {data['metadata'].get('NO_OF_MARKERS', 'N/A')}")
-  print(f"  Частота: {data['metadata'].get('FREQUENCY', 'N/A')} Hz")
-  print(f"  Количество камер: {data['metadata'].get('NO_OF_CAMERAS', 'N/A')}")
+  print(f"📊 Metadata:")
+  print(f"  Number of frames: {data['metadata'].get('NO_OF_FRAMES', 'N/A')}")
+  print(f"  Number of markers: {data['metadata'].get('NO_OF_MARKERS', 'N/A')}")
+  print(f"  Frequency: {data['metadata'].get('FREQUENCY', 'N/A')} Hz")
+  print(f"  Number of cameras: {data['metadata'].get('NO_OF_CAMERAS', 'N/A')}")
   
-  print(f"\n🎯 Маркеры:")
-  print(f"  Первые 5: {', '.join(data['marker_names'][:5])}")
-  print(f"  Всего маркеров: {len(data['marker_names'])}")
-  print(f"  Форма данных: {data['frames'].shape} (кадры, маркеры, XYZ)")
+  print(f"\n🎯 Markers:")
+  print(f"  First 5: {', '.join(data['marker_names'][:5])}")
+  print(f"  Total markers: {len(data['marker_names'])}")
+  print(f"  Data shape: {data['frames'].shape} (frames, markers, XYZ)")
   print(f"{'='*60}")
   
-  # Создаем и запускаем анимацию
-  print("\n🎬 Создание анимации...")
+  # Create and run animation
+  print("\n🎬 Creating animation...")
   
   animator = MarkerAnimator(
     data['frames'],
@@ -438,17 +438,17 @@ def main():
     title=f"Markers - {selected_file.stem}"
   )
   
-  # Параметры анимации
-  # interval: задержка между кадрами в мс
-  # skip_frames: пропуск кадров для ускорения
+  # Animation parameters
+  # interval: delay between frames in ms
+  # skip_frames: skip frames for speed up
   anim = animator.animate(interval=args.interval, skip_frames=args.skip_frames)
   
-  # Сохраняем или показываем анимацию
+  # Save or display animation
   if args.save:
-    print(f"\n💾 Сохранение анимации в файл: {args.save}")
-    print("   (это может занять несколько минут...)")
+    print(f"\n💾 Saving animation to file: {args.save}")
+    print("   (this may take several minutes...)")
     
-    # Определяем writer в зависимости от расширения файла
+    # Determine writer based on file extension
     if args.save.endswith('.gif'):
       writer = 'pillow'
     elif args.save.endswith('.mp4'):
@@ -458,12 +458,12 @@ def main():
     
     try:
       anim.save(args.save, writer=writer, fps=int(1000/args.interval))
-      print(f"✅ Анимация сохранена: {args.save}")
+      print(f"✅ Animation saved: {args.save}")
     except Exception as e:
-      print(f"❌ Ошибка при сохранении: {e}")
-      print("   Попробуйте установить: sudo apt-get install ffmpeg")
+      print(f"❌ Error saving: {e}")
+      print("   Try installing: sudo apt-get install ffmpeg")
   else:
-    print("\n▶️  Анимация запущена. Закройте окно для завершения.")
+    print("\n▶️  Animation started. Close window to exit.")
     plt.show()
 
 
