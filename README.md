@@ -95,6 +95,29 @@ python3 calculate_angles.py data/Measurement1.tsv --save angles.png
 - Three plots comparing right vs left side angles
 - Statistical summary (mean, std, range)
 
+### Save Angles to JSON
+
+```bash
+# Process both measurements
+python3 save_angles.py
+
+# Process specific measurement
+python3 save_angles.py --measurement 1
+python3 save_angles.py --measurement 2
+
+# Specify custom output directory
+python3 save_angles.py --output-dir /path/to/output
+```
+
+**Output:**
+- JSON files saved to `data/calculated_angles/`
+- Files: `Measurement1_calculated_angles.json`, `Measurement2_calculated_angles.json`
+
+**JSON structure:**
+- `metadata`: Frequency, number of frames, source metadata
+- `angles`: Arrays of angle values for each frame (qr1, qr2, qr3, ql1, ql2, ql3)
+- `statistics`: Mean, standard deviation, min, max for each angle
+
 ### Combined Visualization (3D + Angles)
 
 ```bash
@@ -134,6 +157,20 @@ python3 visualize_with_angles.py data/Measurement1.tsv --save combined.gif
 ### Files:
 - **Measurement1.tsv**: 9 markers (filtered from 15)
 - **Measurement2.tsv**: 10 markers (filtered from 16)
+
+### Data Structure:
+
+```
+data/
+├── Measurement1.tsv          # Raw marker data
+├── Measurement2.tsv          # Raw marker data
+├── calculated_angles/        # Calculated angles (JSON)
+│   ├── Measurement1_calculated_angles.json
+│   └── Measurement2_calculated_angles.json
+└── angle_data/              # Reference angle data (TSV)
+    ├── mes1/                # Measurement 1 reference angles
+    └── mes2/                # Measurement 2 reference angles
+```
 
 ## Marker Naming System
 
