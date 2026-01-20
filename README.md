@@ -2,6 +2,8 @@
 
 Scripts for visualizing marker data from Qualisys motion capture system.
 
+> 🎯 **Vibe-Code Project**: This entire project, including all visualization scripts and documentation, was created using [Cursor](https://cursor.sh/) AI-assisted development.
+
 ## Installation
 
 ```bash
@@ -108,3 +110,25 @@ For any script:
 ```bash
 python3 visualize_markers.py --help
 ```
+
+---
+
+## About
+
+**Vibe-Code Project** 🚀
+
+This project demonstrates the power of AI-assisted development. All visualization scripts, data processing logic, and documentation were created entirely using **Cursor AI** - from the initial concept to the final implementation.
+
+### Technologies Used:
+- **Python 3** - Core programming language
+- **NumPy** - Numerical computations
+- **Matplotlib** - 3D visualization and animation
+- **Cursor AI** - AI-assisted development and code generation
+
+### Development Approach:
+- Natural language requirements → Working code
+- Automated refactoring and optimization
+- Real-time code documentation
+- Intelligent error fixing
+
+This showcases how modern AI tools can accelerate the development process while maintaining code quality and best practices.
