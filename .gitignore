@@ -42,6 +42,8 @@ Thumbs.db
 *.gif
 *.mp4
 angles_*.png
+combined*.gif
+combined*.mp4
 *.jpg
 *.jpeg
 output.*

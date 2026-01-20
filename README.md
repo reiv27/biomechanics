@@ -26,11 +26,14 @@ python3 visualize_markers.py data/Measurement1.tsv
 **Parameters:**
 
 ```bash
-# Speed up animation (show every 5th frame)
-python3 visualize_markers.py data/Measurement1.tsv --skip-frames 5
+# Fast animation (all frames, 1ms between frames)
+python3 visualize_markers.py data/Measurement1.tsv --interval 1
 
-# Slow down animation (50 ms interval between frames)
+# Slow animation (all frames, 50ms between frames)
 python3 visualize_markers.py data/Measurement1.tsv --interval 50
+
+# Skip frames (faster but less smooth)
+python3 visualize_markers.py data/Measurement1.tsv --skip-frames 5
 
 # Save as GIF
 python3 visualize_markers.py data/Measurement1.tsv --save animation.gif
@@ -85,6 +88,34 @@ python3 calculate_angles.py data/Measurement1.tsv --save angles.png
 **Output:**
 - Three plots comparing right vs left side angles
 - Statistical summary (mean, std, range)
+
+### Combined Visualization (3D + Angles)
+
+```bash
+# Display combined view (default speed)
+python3 visualize_with_angles.py data/Measurement1.tsv
+
+# Speed up animation (all frames, fast playback)
+python3 visualize_with_angles.py data/Measurement1.tsv --interval 1
+
+# Speed up animation (skip frames, faster but less smooth)
+python3 visualize_with_angles.py data/Measurement1.tsv --skip-frames 5
+
+# Save animation
+python3 visualize_with_angles.py data/Measurement1.tsv --save combined.gif
+```
+
+**Speed control:**
+- `--interval 1` - Very fast (all frames, 1ms between frames) ⚡
+- `--interval 5` - Fast (all frames, 5ms between frames)
+- `--interval 10` - Normal speed (default)
+- `--interval 30` - Slow (all frames, 30ms between frames)
+- `--skip-frames N` - Skip every N frames (less smooth)
+
+**Display:**
+- Left side: 3D marker animation
+- Right side: Three angle plots with current time indicator
+- Real-time synchronization between 3D view and angle graphs
 
 ## Data
 
