@@ -51,10 +51,14 @@ class CombinedVisualizer:
     self.line_qr3 = None
     self.line_ql3 = None
     
-    # Current frame indicator lines
-    self.vline_q1 = None
-    self.vline_q2 = None
-    self.vline_q3 = None
+    # Data for progressive plotting
+    self.time_data = []
+    self.qr1_data = []
+    self.ql1_data = []
+    self.qr2_data = []
+    self.ql2_data = []
+    self.qr3_data = []
+    self.ql3_data = []
     
   def setup_plot(self, frequency=100):
     """Set up the combined visualization layout."""
@@ -135,38 +139,52 @@ class CombinedVisualizer:
   def _setup_angle_plots(self, frequency):
     """Set up angle plot axes."""
     num_frames = len(self.frames_data)
-    time = np.arange(num_frames) / frequency
+    total_time = num_frames / frequency
     
-    # Q1 plot
-    self.line_qr1, = self.ax_q1.plot(time, self.angles['qr1'], 'b-', linewidth=1.5, label='Right', alpha=0.7)
-    self.line_ql1, = self.ax_q1.plot(time, self.angles['ql1'], 'r-', linewidth=1.5, label='Left', alpha=0.7)
-    self.vline_q1 = self.ax_q1.axvline(x=0, color='green', linewidth=2, linestyle='--', alpha=0.8)
+    # Calculate Y-axis limits from all angle data
+    all_q1 = np.concatenate([self.angles['qr1'], self.angles['ql1']])
+    all_q2 = np.concatenate([self.angles['qr2'], self.angles['ql2']])
+    all_q3 = np.concatenate([self.angles['qr3'], self.angles['ql3']])
+    
+    q1_min, q1_max = np.nanmin(all_q1), np.nanmax(all_q1)
+    q2_min, q2_max = np.nanmin(all_q2), np.nanmax(all_q2)
+    q3_min, q3_max = np.nanmin(all_q3), np.nanmax(all_q3)
+    
+    # Add 10% padding
+    q1_padding = (q1_max - q1_min) * 0.1
+    q2_padding = (q2_max - q2_min) * 0.1
+    q3_padding = (q3_max - q3_min) * 0.1
+    
+    # Q1 plot - create empty lines
+    self.line_qr1, = self.ax_q1.plot([], [], 'b-', linewidth=1.5, label='Right', alpha=0.7)
+    self.line_ql1, = self.ax_q1.plot([], [], 'r-', linewidth=1.5, label='Left', alpha=0.7)
     self.ax_q1.set_ylabel('Angle (°)', fontsize=9)
     self.ax_q1.set_title('Q1: Knee-Ankle vs XY plane', fontsize=10, fontweight='bold')
     self.ax_q1.legend(loc='upper right', fontsize=8)
     self.ax_q1.grid(True, alpha=0.3)
-    self.ax_q1.set_xlim(time[0], time[-1])
+    self.ax_q1.set_xlim(0, total_time)
+    self.ax_q1.set_ylim(q1_min - q1_padding, q1_max + q1_padding)
     
-    # Q2 plot
-    self.line_qr2, = self.ax_q2.plot(time, self.angles['qr2'], 'b-', linewidth=1.5, label='Right', alpha=0.7)
-    self.line_ql2, = self.ax_q2.plot(time, self.angles['ql2'], 'r-', linewidth=1.5, label='Left', alpha=0.7)
-    self.vline_q2 = self.ax_q2.axvline(x=0, color='green', linewidth=2, linestyle='--', alpha=0.8)
+    # Q2 plot - create empty lines
+    self.line_qr2, = self.ax_q2.plot([], [], 'b-', linewidth=1.5, label='Right', alpha=0.7)
+    self.line_ql2, = self.ax_q2.plot([], [], 'r-', linewidth=1.5, label='Left', alpha=0.7)
     self.ax_q2.set_ylabel('Angle (°)', fontsize=9)
     self.ax_q2.set_title('Q2: Knee Angle', fontsize=10, fontweight='bold')
     self.ax_q2.legend(loc='upper right', fontsize=8)
     self.ax_q2.grid(True, alpha=0.3)
-    self.ax_q2.set_xlim(time[0], time[-1])
+    self.ax_q2.set_xlim(0, total_time)
+    self.ax_q2.set_ylim(q2_min - q2_padding, q2_max + q2_padding)
     
-    # Q3 plot
-    self.line_qr3, = self.ax_q3.plot(time, self.angles['qr3'], 'b-', linewidth=1.5, label='Right', alpha=0.7)
-    self.line_ql3, = self.ax_q3.plot(time, self.angles['ql3'], 'r-', linewidth=1.5, label='Left', alpha=0.7)
-    self.vline_q3 = self.ax_q3.axvline(x=0, color='green', linewidth=2, linestyle='--', alpha=0.8)
+    # Q3 plot - create empty lines
+    self.line_qr3, = self.ax_q3.plot([], [], 'b-', linewidth=1.5, label='Right', alpha=0.7)
+    self.line_ql3, = self.ax_q3.plot([], [], 'r-', linewidth=1.5, label='Left', alpha=0.7)
     self.ax_q3.set_xlabel('Time (s)', fontsize=9)
     self.ax_q3.set_ylabel('Angle (°)', fontsize=9)
     self.ax_q3.set_title('Q3: Hip Angle', fontsize=10, fontweight='bold')
     self.ax_q3.legend(loc='upper right', fontsize=8)
     self.ax_q3.grid(True, alpha=0.3)
-    self.ax_q3.set_xlim(time[0], time[-1])
+    self.ax_q3.set_xlim(0, total_time)
+    self.ax_q3.set_ylim(q3_min - q3_padding, q3_max + q3_padding)
   
   def update_frame(self, frame_num, frequency=100):
     """Update both 3D markers and angle plots."""
@@ -187,13 +205,37 @@ class CombinedVisualizer:
     self.ax_3d.set_title(f'3D Marker Positions - Frame {frame_num + 1}/{len(self.frames_data)}', 
                          fontsize=12, fontweight='bold')
     
-    # Update vertical lines on angle plots
+    # Add new data point to angle plots
     current_time = frame_num / frequency
-    self.vline_q1.set_xdata([current_time])
-    self.vline_q2.set_xdata([current_time])
-    self.vline_q3.set_xdata([current_time])
+    self.time_data.append(current_time)
+    self.qr1_data.append(self.angles['qr1'][frame_num])
+    self.ql1_data.append(self.angles['ql1'][frame_num])
+    self.qr2_data.append(self.angles['qr2'][frame_num])
+    self.ql2_data.append(self.angles['ql2'][frame_num])
+    self.qr3_data.append(self.angles['qr3'][frame_num])
+    self.ql3_data.append(self.angles['ql3'][frame_num])
     
-    return [self.scatter] + self.labels + [self.vline_q1, self.vline_q2, self.vline_q3]
+    # Update line data
+    self.line_qr1.set_data(self.time_data, self.qr1_data)
+    self.line_ql1.set_data(self.time_data, self.ql1_data)
+    self.line_qr2.set_data(self.time_data, self.qr2_data)
+    self.line_ql2.set_data(self.time_data, self.ql2_data)
+    self.line_qr3.set_data(self.time_data, self.qr3_data)
+    self.line_ql3.set_data(self.time_data, self.ql3_data)
+    
+    return ([self.scatter] + self.labels + 
+            [self.line_qr1, self.line_ql1, self.line_qr2, 
+             self.line_ql2, self.line_qr3, self.line_ql3])
+  
+  def _reset_data(self):
+    """Reset accumulated plot data for new animation cycle."""
+    self.time_data = []
+    self.qr1_data = []
+    self.ql1_data = []
+    self.qr2_data = []
+    self.ql2_data = []
+    self.qr3_data = []
+    self.ql3_data = []
   
   def animate(self, interval=10, skip_frames=1, frequency=100):
     """Run the animation."""
@@ -202,9 +244,16 @@ class CombinedVisualizer:
     num_frames = len(self.frames_data)
     frames_to_show = range(0, num_frames, skip_frames)
     
+    # Function to update frame and reset on loop
+    def update_with_reset(frame_idx):
+      # If this is the first frame, reset data
+      if frame_idx == 0:
+        self._reset_data()
+      return self.update_frame(frame_idx, frequency)
+    
     anim = FuncAnimation(
       self.fig,
-      lambda frame: self.update_frame(frame, frequency),
+      update_with_reset,
       frames=frames_to_show,
       interval=interval,
       blit=False,

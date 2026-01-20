@@ -4,6 +4,12 @@ Scripts for visualizing marker data from Qualisys motion capture system.
 
 > 🎯 **Vibe-Code Project**: This entire project, including all visualization scripts and documentation, was created using [Cursor](https://cursor.sh/) AI-assisted development.
 
+## Demo
+
+![Combined Visualization](combined.gif)
+
+*Real-time 3D marker animation synchronized with joint angle plots. The graphs build progressively as the animation plays.*
+
 ## Installation
 
 ```bash
@@ -114,8 +120,9 @@ python3 visualize_with_angles.py data/Measurement1.tsv --save combined.gif
 
 **Display:**
 - Left side: 3D marker animation
-- Right side: Three angle plots with current time indicator
-- Real-time synchronization between 3D view and angle graphs
+- Right side: Three angle plots that build progressively
+- Real-time synchronization: graphs "follow" the 3D animation
+- Angles are plotted point-by-point as animation progresses
 
 ## Data
 
