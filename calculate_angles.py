@@ -114,12 +114,12 @@ def calculate_angles(frames_data, marker_names):
       # qr2: angle between ra->rk and rh->rk
       vec_ra_rk = rk - ra
       vec_rh_rk = rk - rh
-      angles['qr2'][frame_idx] = angle_between_vectors(vec_ra_rk, vec_rh_rk)
+      angles['qr2'][frame_idx] = 180.0 - angle_between_vectors(vec_ra_rk, vec_rh_rk)
       
       # qr3: angle between rk->rh and rs->rh
       vec_rk_rh = rh - rk
       vec_rs_rh = rh - rs
-      angles['qr3'][frame_idx] = angle_between_vectors(vec_rk_rh, vec_rs_rh)
+      angles['qr3'][frame_idx] = 180.0 - angle_between_vectors(vec_rk_rh, vec_rs_rh)
     
     # Left side angles
     if has_left:
@@ -135,17 +135,17 @@ def calculate_angles(frames_data, marker_names):
       # ql2: angle between la->lk and lh->lk
       vec_la_lk = lk - la
       vec_lh_lk = lk - lh
-      angles['ql2'][frame_idx] = angle_between_vectors(vec_la_lk, vec_lh_lk)
+      angles['ql2'][frame_idx] = 180.0 - angle_between_vectors(vec_la_lk, vec_lh_lk)
       
       # ql3: angle between lk->lh and ls->lh
       vec_lk_lh = lh - lk
       vec_ls_lh = lh - ls
-      angles['ql3'][frame_idx] = angle_between_vectors(vec_lk_lh, vec_ls_lh)
+      angles['ql3'][frame_idx] = 180.0 - angle_between_vectors(vec_lk_lh, vec_ls_lh)
   
   return angles
 
 
-def plot_angles(angles, frequency=100, save_path=None):
+def plot_angles(angles, frequency=100, save_path=None, start_frame=None, end_frame=None):
   """
   Plot calculated angles.
   
@@ -153,33 +153,58 @@ def plot_angles(angles, frequency=100, save_path=None):
     angles: Dictionary with angle arrays
     frequency: Sampling frequency in Hz
     save_path: Optional path to save the plot
+    start_frame: Start frame index (0-based, inclusive). If None, start from beginning.
+    end_frame: End frame index (0-based, exclusive). If None, end at last frame.
   """
   num_frames = len(angles['qr1'])
-  time = np.arange(num_frames) / frequency
+  
+  # Determine frame range for plotting
+  if start_frame is not None or end_frame is not None:
+    start = start_frame if start_frame is not None else 0
+    end = end_frame if end_frame is not None else num_frames
+    start = max(0, min(start, num_frames))
+    end = max(start, min(end, num_frames))
+    
+    # Filter angles for plotting
+    plot_angles = {
+      'qr1': angles['qr1'][start:end],
+      'qr2': angles['qr2'][start:end],
+      'qr3': angles['qr3'][start:end],
+      'ql1': angles['ql1'][start:end],
+      'ql2': angles['ql2'][start:end],
+      'ql3': angles['ql3'][start:end],
+    }
+    plot_frames = end - start
+    time = np.arange(plot_frames) / frequency
+    range_info = f' (frames {start}-{end})'
+  else:
+    plot_angles = angles
+    time = np.arange(num_frames) / frequency
+    range_info = ''
   
   # Create figure with 3 subplots
   fig, axes = plt.subplots(3, 1, figsize=(14, 10))
-  fig.suptitle('Joint Angles Comparison (Right vs Left)', fontsize=16, fontweight='bold')
+  fig.suptitle(f'Joint Angles Comparison (Right vs Left){range_info}', fontsize=16, fontweight='bold')
   
   # Plot qr1 and ql1
-  axes[0].plot(time, angles['qr1'], 'b-', linewidth=2, label='qr1 (Right)', alpha=0.8)
-  axes[0].plot(time, angles['ql1'], 'r-', linewidth=2, label='ql1 (Left)', alpha=0.8)
+  axes[0].plot(time, plot_angles['qr1'], 'b-', linewidth=2, label='qr1 (Right)', alpha=0.8)
+  axes[0].plot(time, plot_angles['ql1'], 'r-', linewidth=2, label='ql1 (Left)', alpha=0.8)
   axes[0].set_ylabel('Angle (degrees)', fontsize=12)
   axes[0].set_title('Q1: Angle between knee-ankle and XY plane', fontsize=13, fontweight='bold')
   axes[0].legend(loc='upper right', fontsize=11)
   axes[0].grid(True, alpha=0.3)
   
   # Plot qr2 and ql2
-  axes[1].plot(time, angles['qr2'], 'b-', linewidth=2, label='qr2 (Right)', alpha=0.8)
-  axes[1].plot(time, angles['ql2'], 'r-', linewidth=2, label='ql2 (Left)', alpha=0.8)
+  axes[1].plot(time, plot_angles['qr2'], 'b-', linewidth=2, label='qr2 (Right)', alpha=0.8)
+  axes[1].plot(time, plot_angles['ql2'], 'r-', linewidth=2, label='ql2 (Left)', alpha=0.8)
   axes[1].set_ylabel('Angle (degrees)', fontsize=12)
   axes[1].set_title('Q2: Angle at knee joint (ankle-knee-hip)', fontsize=13, fontweight='bold')
   axes[1].legend(loc='upper right', fontsize=11)
   axes[1].grid(True, alpha=0.3)
   
   # Plot qr3 and ql3
-  axes[2].plot(time, angles['qr3'], 'b-', linewidth=2, label='qr3 (Right)', alpha=0.8)
-  axes[2].plot(time, angles['ql3'], 'r-', linewidth=2, label='ql3 (Left)', alpha=0.8)
+  axes[2].plot(time, plot_angles['qr3'], 'b-', linewidth=2, label='qr3 (Right)', alpha=0.8)
+  axes[2].plot(time, plot_angles['ql3'], 'r-', linewidth=2, label='ql3 (Left)', alpha=0.8)
   axes[2].set_xlabel('Time (seconds)', fontsize=12)
   axes[2].set_ylabel('Angle (degrees)', fontsize=12)
   axes[2].set_title('Q3: Angle at hip joint (knee-hip-shoulder)', fontsize=13, fontweight='bold')
@@ -209,6 +234,20 @@ def main():
     '--save',
     type=str,
     help='Save plot to file (e.g., angles.png)'
+  )
+  parser.add_argument(
+    '--from',
+    type=int,
+    dest='start_frame',
+    metavar='FRAME',
+    help='Start frame index (0-based, inclusive). If not specified, start from beginning.'
+  )
+  parser.add_argument(
+    '--to',
+    type=int,
+    dest='end_frame',
+    metavar='FRAME',
+    help='End frame index (0-based, exclusive). If not specified, end at last frame.'
   )
   
   args = parser.parse_args()
@@ -248,7 +287,19 @@ def main():
   
   # Plot angles
   print("\n📈 Creating plots...")
-  plot_angles(angles, frequency=frequency, save_path=args.save)
+  if args.start_frame is not None or args.end_frame is not None:
+    num_frames = len(angles['qr1'])
+    start = args.start_frame if args.start_frame is not None else 0
+    end = args.end_frame if args.end_frame is not None else num_frames
+    print(f"   Showing frames {start} to {end} (total: {num_frames})")
+  
+  plot_angles(
+    angles, 
+    frequency=frequency, 
+    save_path=args.save,
+    start_frame=args.start_frame,
+    end_frame=args.end_frame
+  )
   
   print("\n✅ Done!")
 

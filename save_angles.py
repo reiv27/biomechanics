@@ -11,7 +11,7 @@ from calculate_angles import calculate_angles
 from visualize_markers import MarkerDataReader
 
 
-def save_angles_to_json(angles, metadata, output_path, frequency=100):
+def save_angles_to_json(angles, metadata, output_path, frequency=100, start_frame=None, end_frame=None):
   """
   Save calculated angles to JSON file.
   
@@ -20,69 +20,101 @@ def save_angles_to_json(angles, metadata, output_path, frequency=100):
     metadata: Dictionary with metadata from marker data
     output_path: Path to output JSON file
     frequency: Sampling frequency in Hz
+    start_frame: Start frame index (0-based, inclusive). If None, save all frames.
+    end_frame: End frame index (0-based, exclusive). If None, save all frames.
   """
+  num_frames = len(angles['qr1'])
+  
+  # Determine frame range
+  if start_frame is not None or end_frame is not None:
+    start = start_frame if start_frame is not None else 0
+    end = end_frame if end_frame is not None else num_frames
+    start = max(0, min(start, num_frames))
+    end = max(start, min(end, num_frames))
+    
+    # Filter angles for saving
+    filtered_angles = {
+      'qr1': angles['qr1'][start:end],
+      'qr2': angles['qr2'][start:end],
+      'qr3': angles['qr3'][start:end],
+      'ql1': angles['ql1'][start:end],
+      'ql2': angles['ql2'][start:end],
+      'ql3': angles['ql3'][start:end],
+    }
+    save_angles = filtered_angles
+    saved_frames = end - start
+    frame_range = {'start_frame': int(start), 'end_frame': int(end), 'total_frames': int(num_frames)}
+  else:
+    save_angles = angles
+    saved_frames = num_frames
+    frame_range = None
+  
   # Prepare data for JSON (convert numpy arrays to lists)
   json_data = {
     'metadata': {
       'frequency': frequency,
-      'num_frames': len(angles['qr1']),
+      'num_frames': saved_frames,
       'source_metadata': metadata
     },
     'angles': {
       'right': {
-        'qr1': angles['qr1'].tolist(),
-        'qr2': angles['qr2'].tolist(),
-        'qr3': angles['qr3'].tolist()
+        'qr1': save_angles['qr1'].tolist(),
+        'qr2': save_angles['qr2'].tolist(),
+        'qr3': save_angles['qr3'].tolist()
       },
       'left': {
-        'ql1': angles['ql1'].tolist(),
-        'ql2': angles['ql2'].tolist(),
-        'ql3': angles['ql3'].tolist()
+        'ql1': save_angles['ql1'].tolist(),
+        'ql2': save_angles['ql2'].tolist(),
+        'ql3': save_angles['ql3'].tolist()
       }
     },
     'statistics': {
       'right': {
         'qr1': {
-          'mean': float(np.mean(angles['qr1'])),
-          'std': float(np.std(angles['qr1'])),
-          'min': float(np.min(angles['qr1'])),
-          'max': float(np.max(angles['qr1']))
+          'mean': float(np.mean(save_angles['qr1'])),
+          'std': float(np.std(save_angles['qr1'])),
+          'min': float(np.min(save_angles['qr1'])),
+          'max': float(np.max(save_angles['qr1']))
         },
         'qr2': {
-          'mean': float(np.mean(angles['qr2'])),
-          'std': float(np.std(angles['qr2'])),
-          'min': float(np.min(angles['qr2'])),
-          'max': float(np.max(angles['qr2']))
+          'mean': float(np.mean(save_angles['qr2'])),
+          'std': float(np.std(save_angles['qr2'])),
+          'min': float(np.min(save_angles['qr2'])),
+          'max': float(np.max(save_angles['qr2']))
         },
         'qr3': {
-          'mean': float(np.mean(angles['qr3'])),
-          'std': float(np.std(angles['qr3'])),
-          'min': float(np.min(angles['qr3'])),
-          'max': float(np.max(angles['qr3']))
+          'mean': float(np.mean(save_angles['qr3'])),
+          'std': float(np.std(save_angles['qr3'])),
+          'min': float(np.min(save_angles['qr3'])),
+          'max': float(np.max(save_angles['qr3']))
         }
       },
       'left': {
         'ql1': {
-          'mean': float(np.mean(angles['ql1'])),
-          'std': float(np.std(angles['ql1'])),
-          'min': float(np.min(angles['ql1'])),
-          'max': float(np.max(angles['ql1']))
+          'mean': float(np.mean(save_angles['ql1'])),
+          'std': float(np.std(save_angles['ql1'])),
+          'min': float(np.min(save_angles['ql1'])),
+          'max': float(np.max(save_angles['ql1']))
         },
         'ql2': {
-          'mean': float(np.mean(angles['ql2'])),
-          'std': float(np.std(angles['ql2'])),
-          'min': float(np.min(angles['ql2'])),
-          'max': float(np.max(angles['ql2']))
+          'mean': float(np.mean(save_angles['ql2'])),
+          'std': float(np.std(save_angles['ql2'])),
+          'min': float(np.min(save_angles['ql2'])),
+          'max': float(np.max(save_angles['ql2']))
         },
         'ql3': {
-          'mean': float(np.mean(angles['ql3'])),
-          'std': float(np.std(angles['ql3'])),
-          'min': float(np.min(angles['ql3'])),
-          'max': float(np.max(angles['ql3']))
+          'mean': float(np.mean(save_angles['ql3'])),
+          'std': float(np.std(save_angles['ql3'])),
+          'min': float(np.min(save_angles['ql3'])),
+          'max': float(np.max(save_angles['ql3']))
         }
       }
     }
   }
+  
+  # Add frame range info if specified
+  if frame_range:
+    json_data['metadata']['frame_range'] = frame_range
   
   # Save to JSON file
   output_path = Path(output_path)
@@ -94,13 +126,15 @@ def save_angles_to_json(angles, metadata, output_path, frequency=100):
   print(f"✅ Углы сохранены в: {output_path}")
 
 
-def process_measurement(measurement_num, output_dir=None):
+def process_measurement(measurement_num, output_dir=None, start_frame=None, end_frame=None):
   """
   Process a single measurement: calculate and save angles.
   
   Args:
     measurement_num: Measurement number (1 or 2)
     output_dir: Output directory for JSON files (default: data/angle_data/mes{N}/)
+    start_frame: Start frame index (0-based, inclusive). If None, save all frames.
+    end_frame: End frame index (0-based, exclusive). If None, save all frames.
   """
   print(f"\n{'='*80}")
   print(f"📊 Обработка Measurement{measurement_num}")
@@ -156,11 +190,19 @@ def process_measurement(measurement_num, output_dir=None):
   # Save to JSON
   output_path = output_dir / f'Measurement{measurement_num}_calculated_angles.json'
   print(f"\n💾 Сохранение углов в JSON...")
+  if start_frame is not None or end_frame is not None:
+    num_frames = len(calculated_angles['qr1'])
+    start = start_frame if start_frame is not None else 0
+    end = end_frame if end_frame is not None else num_frames
+    print(f"   Сохранение кадров {start} до {end} (всего: {num_frames})")
+  
   save_angles_to_json(
     calculated_angles,
     marker_data['metadata'],
     output_path,
-    frequency=frequency
+    frequency=frequency,
+    start_frame=start_frame,
+    end_frame=end_frame
   )
   
   return output_path
@@ -184,15 +226,29 @@ def main():
     type=str,
     help='Output directory for JSON files (default: data/angle_data/mes{N}/)'
   )
+  parser.add_argument(
+    '--from',
+    type=int,
+    dest='start_frame',
+    metavar='FRAME',
+    help='Start frame index (0-based, inclusive). If not specified, save all frames.'
+  )
+  parser.add_argument(
+    '--to',
+    type=int,
+    dest='end_frame',
+    metavar='FRAME',
+    help='End frame index (0-based, exclusive). If not specified, save all frames.'
+  )
   
   args = parser.parse_args()
   
   if args.measurement:
-    process_measurement(args.measurement, args.output_dir)
+    process_measurement(args.measurement, args.output_dir, args.start_frame, args.end_frame)
   else:
     # Process both measurements
-    process_measurement(1, args.output_dir)
-    process_measurement(2, args.output_dir)
+    process_measurement(1, args.output_dir, args.start_frame, args.end_frame)
+    process_measurement(2, args.output_dir, args.start_frame, args.end_frame)
   
   print(f"\n{'='*80}")
   print("✅ Обработка завершена!")
