@@ -83,6 +83,9 @@ python3 calculate_angles.py data/Measurement1.tsv
 
 # Save plots to file
 python3 calculate_angles.py data/Measurement1.tsv --save angles.png
+
+# Display specific frame range
+python3 calculate_angles.py data/Measurement1.tsv --from 0 --to 500
 ```
 
 **Calculated angles:**
@@ -94,6 +97,7 @@ python3 calculate_angles.py data/Measurement1.tsv --save angles.png
 **Output:**
 - Three plots comparing right vs left side angles
 - Statistical summary (mean, std, range)
+- Frame range displayed in plot title if specified
 
 ### Save Angles to JSON
 
@@ -105,6 +109,9 @@ python3 save_angles.py
 python3 save_angles.py --measurement 1
 python3 save_angles.py --measurement 2
 
+# Save specific frame range
+python3 save_angles.py --measurement 1 --from 0 --to 500
+
 # Specify custom output directory
 python3 save_angles.py --output-dir /path/to/output
 ```
@@ -114,9 +121,25 @@ python3 save_angles.py --output-dir /path/to/output
 - Files: `Measurement1_calculated_angles.json`, `Measurement2_calculated_angles.json`
 
 **JSON structure:**
-- `metadata`: Frequency, number of frames, source metadata
+- `metadata`: Frequency, number of frames, source metadata, frame_range (if specified)
 - `angles`: Arrays of angle values for each frame (qr1, qr2, qr3, ql1, ql2, ql3)
 - `statistics`: Mean, standard deviation, min, max for each angle
+
+### Angle Approximation
+
+```bash
+# Plot dependencies and approximate with 3rd degree polynomials
+python3 approximation.py --measurement 1
+
+# Plot specific frame range
+python3 approximation.py --measurement 1 --from 0 --to 500
+```
+
+**Output:**
+- Plots showing q1 vs q2 and q3 vs q2 dependencies
+- 3rd degree polynomial approximations: q1 = phi_1(q2), q3 = phi_3(q2)
+- Coefficients printed to console (4 coefficients per function: a, b, c, d)
+- Polynomial form: a*q2³ + b*q2² + c*q2 + d
 
 ### Combined Visualization (3D + Angles)
 

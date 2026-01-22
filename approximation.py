@@ -67,7 +67,6 @@ def filter_angles_by_range(angles_data, start_frame=None, end_frame=None):
     }
   }
   
-  # Get original arrays
   qr1 = angles_data['angles']['right']['q1']
   qr2 = angles_data['angles']['right']['q2']
   qr3 = angles_data['angles']['right']['q3']
@@ -75,16 +74,13 @@ def filter_angles_by_range(angles_data, start_frame=None, end_frame=None):
   ql2 = angles_data['angles']['left']['q2']
   ql3 = angles_data['angles']['left']['q3']
   
-  # Determine range
   num_frames = len(qr1)
   start = start_frame if start_frame is not None else 0
   end = end_frame if end_frame is not None else num_frames
   
-  # Validate range
   start = max(0, min(start, num_frames))
   end = max(start, min(end, num_frames))
   
-  # Filter arrays
   filtered['angles']['right']['q1'] = qr1[start:end]
   filtered['angles']['right']['q2'] = qr2[start:end]
   filtered['angles']['right']['q3'] = qr3[start:end]
@@ -128,11 +124,9 @@ def plot_angle_dependencies(angles_data, measurement_name, save_path=None, start
     start_frame: Start frame index for filtering (overrides JSON frame_range if present)
     end_frame: End frame index for filtering (overrides JSON frame_range if present)
   """
-  # Check if frame_range is in JSON metadata (from save_angles.py)
   if 'frame_range' in angles_data and (start_frame is None and end_frame is None):
     frame_range = angles_data['frame_range']
     range_info = f' (frames {frame_range["start_frame"]}-{frame_range["end_frame"]} from total {frame_range["total_frames"]})'
-  # Filter data if range specified via command line (overrides JSON)
   elif start_frame is not None or end_frame is not None:
     angles_data, start, end = filter_angles_by_range(angles_data, start_frame, end_frame)
     range_info = f' (frames {start}-{end})'
@@ -152,15 +146,12 @@ def plot_angle_dependencies(angles_data, measurement_name, save_path=None, start
   ql2 = angles_data['angles']['left']['q2']
   ql3 = angles_data['angles']['left']['q3']
   
-  # Approximate phi_1 and phi_3 for right side
   phi1_r_coeffs, phi1_r_func = approximate_polynomial_3rd_degree(qr2, qr1)
   phi3_r_coeffs, phi3_r_func = approximate_polynomial_3rd_degree(qr2, qr3)
   
-  # Approximate phi_1 and phi_3 for left side
   phi1_l_coeffs, phi1_l_func = approximate_polynomial_3rd_degree(ql2, ql1)
   phi3_l_coeffs, phi3_l_func = approximate_polynomial_3rd_degree(ql2, ql3)
   
-  # Print coefficients
   print(f"\n📊 Coefficients for {measurement_name}:")
   print(f"\n  Right side:")
   print(f"    phi_1(q2) = q1: a={phi1_r_coeffs[0]:.6e}, b={phi1_r_coeffs[1]:.6e}, c={phi1_r_coeffs[2]:.6e}, d={phi1_r_coeffs[3]:.6e}")
@@ -169,7 +160,6 @@ def plot_angle_dependencies(angles_data, measurement_name, save_path=None, start
   print(f"    phi_1(q2) = q1: a={phi1_l_coeffs[0]:.6e}, b={phi1_l_coeffs[1]:.6e}, c={phi1_l_coeffs[2]:.6e}, d={phi1_l_coeffs[3]:.6e}")
   print(f"    phi_3(q2) = q3: a={phi3_l_coeffs[0]:.6e}, b={phi3_l_coeffs[1]:.6e}, c={phi3_l_coeffs[2]:.6e}, d={phi3_l_coeffs[3]:.6e}")
   
-  # Create smooth x values for plotting approximations
   qr2_smooth = np.linspace(qr2.min(), qr2.max(), 200)
   ql2_smooth = np.linspace(ql2.min(), ql2.max(), 200)
   

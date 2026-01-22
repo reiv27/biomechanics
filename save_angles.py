@@ -25,14 +25,12 @@ def save_angles_to_json(angles, metadata, output_path, frequency=100, start_fram
   """
   num_frames = len(angles['qr1'])
   
-  # Determine frame range
   if start_frame is not None or end_frame is not None:
     start = start_frame if start_frame is not None else 0
     end = end_frame if end_frame is not None else num_frames
     start = max(0, min(start, num_frames))
     end = max(start, min(end, num_frames))
     
-    # Filter angles for saving
     filtered_angles = {
       'qr1': angles['qr1'][start:end],
       'qr2': angles['qr2'][start:end],
@@ -49,7 +47,6 @@ def save_angles_to_json(angles, metadata, output_path, frequency=100, start_fram
     saved_frames = num_frames
     frame_range = None
   
-  # Prepare data for JSON (convert numpy arrays to lists)
   json_data = {
     'metadata': {
       'frequency': frequency,
@@ -112,18 +109,16 @@ def save_angles_to_json(angles, metadata, output_path, frequency=100, start_fram
     }
   }
   
-  # Add frame range info if specified
   if frame_range:
     json_data['metadata']['frame_range'] = frame_range
   
-  # Save to JSON file
   output_path = Path(output_path)
   output_path.parent.mkdir(parents=True, exist_ok=True)
   
   with open(output_path, 'w', encoding='utf-8') as f:
     json.dump(json_data, f, indent=2, ensure_ascii=False)
   
-  print(f"✅ Углы сохранены в: {output_path}")
+  print(f"✅ Angles saved to: {output_path}")
 
 
 def process_measurement(measurement_num, output_dir=None, start_frame=None, end_frame=None):
@@ -137,7 +132,7 @@ def process_measurement(measurement_num, output_dir=None, start_frame=None, end_
     end_frame: End frame index (0-based, exclusive). If None, save all frames.
   """
   print(f"\n{'='*80}")
-  print(f"📊 Обработка Measurement{measurement_num}")
+  print(f"📊 Processing Measurement{measurement_num}")
   print(f"{'='*80}")
   
   # Paths
@@ -145,56 +140,50 @@ def process_measurement(measurement_num, output_dir=None, start_frame=None, end_
   marker_file = base_dir / 'data' / f'Measurement{measurement_num}.tsv'
   
   if output_dir is None:
-    # Save calculated angles to separate directory
     output_dir = base_dir / 'data' / 'calculated_angles'
   else:
     output_dir = Path(output_dir)
   
   if not marker_file.exists():
-    print(f"❌ Файл маркеров не найден: {marker_file}")
+    print(f"❌ Error: Marker file not found: {marker_file}")
     return
   
-  # Read marker data and calculate angles
-  print(f"\n📂 Чтение данных маркеров: {marker_file}")
+  print(f"\n📂 Reading marker data: {marker_file}")
   reader = MarkerDataReader(marker_file)
   marker_data = reader.read_file()
   
-  print(f"✅ Загружено {len(marker_data['frames'])} кадров")
-  print(f"   Маркеры: {', '.join(marker_data['simple_names'])}")
+  print(f"✅ Loaded {len(marker_data['frames'])} frames")
+  print(f"   Markers: {', '.join(marker_data['simple_names'])}")
   
-  # Calculate angles
-  print(f"\n📐 Вычисление углов...")
+  print(f"\n📐 Calculating angles...")
   calculated_angles = calculate_angles(marker_data['frames'], marker_data['simple_names'])
   
-  # Get frequency
   frequency = float(marker_data['metadata'].get('FREQUENCY', 100))
   
-  # Print statistics
-  print(f"\n📊 Статистика углов:")
-  print(f"\n  Правая сторона:")
+  print(f"\n📊 Angle Statistics:")
+  print(f"\n  Right side:")
   print(f"    qr1: {calculated_angles['qr1'].mean():.1f}° ± {calculated_angles['qr1'].std():.1f}° "
-        f"(диапазон: {calculated_angles['qr1'].min():.1f}° - {calculated_angles['qr1'].max():.1f}°)")
+        f"(range: {calculated_angles['qr1'].min():.1f}° - {calculated_angles['qr1'].max():.1f}°)")
   print(f"    qr2: {calculated_angles['qr2'].mean():.1f}° ± {calculated_angles['qr2'].std():.1f}° "
-        f"(диапазон: {calculated_angles['qr2'].min():.1f}° - {calculated_angles['qr2'].max():.1f}°)")
+        f"(range: {calculated_angles['qr2'].min():.1f}° - {calculated_angles['qr2'].max():.1f}°)")
   print(f"    qr3: {calculated_angles['qr3'].mean():.1f}° ± {calculated_angles['qr3'].std():.1f}° "
-        f"(диапазон: {calculated_angles['qr3'].min():.1f}° - {calculated_angles['qr3'].max():.1f}°)")
+        f"(range: {calculated_angles['qr3'].min():.1f}° - {calculated_angles['qr3'].max():.1f}°)")
   
-  print(f"\n  Левая сторона:")
+  print(f"\n  Left side:")
   print(f"    ql1: {calculated_angles['ql1'].mean():.1f}° ± {calculated_angles['ql1'].std():.1f}° "
-        f"(диапазон: {calculated_angles['ql1'].min():.1f}° - {calculated_angles['ql1'].max():.1f}°)")
+        f"(range: {calculated_angles['ql1'].min():.1f}° - {calculated_angles['ql1'].max():.1f}°)")
   print(f"    ql2: {calculated_angles['ql2'].mean():.1f}° ± {calculated_angles['ql2'].std():.1f}° "
-        f"(диапазон: {calculated_angles['ql2'].min():.1f}° - {calculated_angles['ql2'].max():.1f}°)")
+        f"(range: {calculated_angles['ql2'].min():.1f}° - {calculated_angles['ql2'].max():.1f}°)")
   print(f"    ql3: {calculated_angles['ql3'].mean():.1f}° ± {calculated_angles['ql3'].std():.1f}° "
-        f"(диапазон: {calculated_angles['ql3'].min():.1f}° - {calculated_angles['ql3'].max():.1f}°)")
+        f"(range: {calculated_angles['ql3'].min():.1f}° - {calculated_angles['ql3'].max():.1f}°)")
   
-  # Save to JSON
   output_path = output_dir / f'Measurement{measurement_num}_calculated_angles.json'
-  print(f"\n💾 Сохранение углов в JSON...")
+  print(f"\n💾 Saving angles to JSON...")
   if start_frame is not None or end_frame is not None:
     num_frames = len(calculated_angles['qr1'])
     start = start_frame if start_frame is not None else 0
     end = end_frame if end_frame is not None else num_frames
-    print(f"   Сохранение кадров {start} до {end} (всего: {num_frames})")
+    print(f"   Saving frames {start} to {end} (total: {num_frames})")
   
   save_angles_to_json(
     calculated_angles,
@@ -246,12 +235,11 @@ def main():
   if args.measurement:
     process_measurement(args.measurement, args.output_dir, args.start_frame, args.end_frame)
   else:
-    # Process both measurements
     process_measurement(1, args.output_dir, args.start_frame, args.end_frame)
     process_measurement(2, args.output_dir, args.start_frame, args.end_frame)
   
   print(f"\n{'='*80}")
-  print("✅ Обработка завершена!")
+  print("✅ Processing completed!")
   print(f"{'='*80}\n")
 
 

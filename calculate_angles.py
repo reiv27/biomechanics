@@ -21,19 +21,15 @@ def angle_with_xy_plane(vector):
   Returns:
     Angle in degrees
   """
-  # Projection of vector onto XY plane
   xy_projection = np.array([vector[0], vector[1], 0])
   
-  # Angle between vector and its XY projection
   if np.linalg.norm(vector) == 0 or np.linalg.norm(xy_projection) == 0:
     return 0.0
   
-  # Angle using dot product
   cos_angle = np.dot(vector, xy_projection) / (np.linalg.norm(vector) * np.linalg.norm(xy_projection))
   cos_angle = np.clip(cos_angle, -1.0, 1.0)
   angle = np.arccos(cos_angle)
   
-  # Return angle in degrees
   return np.degrees(angle)
 
 
