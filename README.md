@@ -128,18 +128,49 @@ python3 save_angles.py --output-dir /path/to/output
 ### Angle Approximation
 
 ```bash
-# Plot dependencies and approximate with 3rd degree polynomials
+# Plot dependencies and approximate with polynomials
 python3 approximation.py --measurement 1
 
 # Plot specific frame range
 python3 approximation.py --measurement 1 --from 0 --to 500
+
+# Save approximation data to JSON
+python3 approximation.py --measurement 1 --save-json approximation_data.json
+
+# Save plot to file
+python3 approximation.py --measurement 1 --save plot.png
 ```
 
 **Output:**
-- Plots showing q1 vs q2 and q3 vs q2 dependencies
-- 3rd degree polynomial approximations: q1 = phi_1(q2), q3 = phi_3(q2)
-- Coefficients printed to console (4 coefficients per function: a, b, c, d)
-- Polynomial form: a*q2³ + b*q2² + c*q2 + d
+- **4 rows of plots:**
+  - Row 1: q1 vs q2 and q3 vs q2 dependencies (right side)
+  - Row 2: q1 vs q2 and q3 vs q2 dependencies (left side)
+  - Row 3: q2 vs time (raw data and 5th degree polynomial approximation)
+  - Row 4: dq2/dt vs time (derivative from raw data and from polynomial)
+
+**Approximations:**
+- **phi_1(q2) = q1**: 3rd degree polynomial (4 coefficients: a, b, c, d)
+- **phi_3(q2) = q3**: 3rd degree polynomial (4 coefficients: a, b, c, d)
+- **q2(t)**: 5th degree polynomial (6 coefficients: a, b, c, d, e, f)
+
+**Polynomial forms:**
+- phi_1, phi_3: `a*q2³ + b*q2² + c*q2 + d`
+- q2(t): `a*t⁵ + b*t⁴ + c*t³ + d*t² + e*t + f`
+
+**Derivatives:**
+- dq2/dt calculated from raw data using `numpy.gradient`
+- dq2/dt calculated from polynomial approximation
+- Both displayed for comparison
+
+**JSON output structure:**
+- `approximation_coefficients`: Polynomial coefficients for phi_1, phi_3, and q2_t (right and left)
+- `derivatives`: dq2/dt arrays (raw and from polynomial) for right and left
+- `time`: Time array
+- `metadata`: Measurement info, frequency, frame range
+
+**Color scheme:**
+- Right side: Black (raw data), Brown (polynomials)
+- Left side: Red (raw data), Blue (polynomials)
 
 ### Combined Visualization (3D + Angles)
 

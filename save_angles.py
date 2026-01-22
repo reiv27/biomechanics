@@ -135,7 +135,6 @@ def process_measurement(measurement_num, output_dir=None, start_frame=None, end_
   print(f"📊 Processing Measurement{measurement_num}")
   print(f"{'='*80}")
   
-  # Paths
   base_dir = Path(__file__).parent
   marker_file = base_dir / 'data' / f'Measurement{measurement_num}.tsv'
   
