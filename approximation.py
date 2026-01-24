@@ -167,6 +167,7 @@ def save_approximation_data(result_data, angles_data, measurement_name, output_p
     },
     'approximation_coefficients': result_data['coefficients'],
     'derivatives': result_data['derivatives'],
+    'q2': result_data['q2'],
     'time': result_data['time']
   }
   
@@ -378,6 +379,10 @@ def plot_angle_dependencies(angles_data, measurement_name, save_path=None, start
         'dq2_dt': dq2_l_dt.tolist(),
         'dq2_dt_from_polynomial': dq2_l_dt_approx.tolist()
       }
+    },
+    'q2': {
+      'right': qr2.tolist(),
+      'left': ql2.tolist()
     },
     'time': time.tolist()
   }
