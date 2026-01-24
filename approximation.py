@@ -133,11 +133,11 @@ def calculate_derivative(q2, frequency=100):
   Calculate derivative of q2 with respect to time using numpy.gradient.
   
   Args:
-    q2: Array of q2 values
+    q2: Array of q2 values (in radians)
     frequency: Sampling frequency in Hz
     
   Returns:
-    Array of dq2/dt values (degrees per second)
+    Array of dq2/dt values (radians per second)
   """
   dt = 1.0 / frequency
   dq2_dt = np.gradient(q2, dt)
@@ -253,32 +253,32 @@ def plot_angle_dependencies(angles_data, measurement_name, save_path=None, start
   
   axes[0, 0].scatter(qr2, qr1, alpha=0.5, s=10, c='black', label='Data')
   axes[0, 0].plot(qr2_smooth, phi1_r_func(qr2_smooth), 'brown', linewidth=2, label='phi_1(q2) polynomial', alpha=0.8)
-  axes[0, 0].set_xlabel('q2 (degrees)', fontsize=12)
-  axes[0, 0].set_ylabel('q1 (degrees)', fontsize=12)
+  axes[0, 0].set_xlabel('q2 (radians)', fontsize=12)
+  axes[0, 0].set_ylabel('q1 (radians)', fontsize=12)
   axes[0, 0].set_title('Right: q1 vs q2', fontsize=13, fontweight='bold')
   axes[0, 0].grid(True, alpha=0.3)
   axes[0, 0].legend()
   
   axes[0, 1].scatter(qr2, qr3, alpha=0.5, s=10, c='black', label='Data')
   axes[0, 1].plot(qr2_smooth, phi3_r_func(qr2_smooth), 'brown', linewidth=2, label='phi_3(q2) polynomial', alpha=0.8)
-  axes[0, 1].set_xlabel('q2 (degrees)', fontsize=12)
-  axes[0, 1].set_ylabel('q3 (degrees)', fontsize=12)
+  axes[0, 1].set_xlabel('q2 (radians)', fontsize=12)
+  axes[0, 1].set_ylabel('q3 (radians)', fontsize=12)
   axes[0, 1].set_title('Right: q3 vs q2', fontsize=13, fontweight='bold')
   axes[0, 1].grid(True, alpha=0.3)
   axes[0, 1].legend()
   
   axes[1, 0].scatter(ql2, ql1, alpha=0.5, s=10, c='red', label='Data')
   axes[1, 0].plot(ql2_smooth, phi1_l_func(ql2_smooth), 'b-', linewidth=2, label='phi_1(q2) polynomial', alpha=0.8)
-  axes[1, 0].set_xlabel('q2 (degrees)', fontsize=12)
-  axes[1, 0].set_ylabel('q1 (degrees)', fontsize=12)
+  axes[1, 0].set_xlabel('q2 (radians)', fontsize=12)
+  axes[1, 0].set_ylabel('q1 (radians)', fontsize=12)
   axes[1, 0].set_title('Left: q1 vs q2', fontsize=13, fontweight='bold')
   axes[1, 0].grid(True, alpha=0.3)
   axes[1, 0].legend()
   
   axes[1, 1].scatter(ql2, ql3, alpha=0.5, s=10, c='red', label='Data')
   axes[1, 1].plot(ql2_smooth, phi3_l_func(ql2_smooth), 'b-', linewidth=2, label='phi_3(q2) polynomial', alpha=0.8)
-  axes[1, 1].set_xlabel('q2 (degrees)', fontsize=12)
-  axes[1, 1].set_ylabel('q3 (degrees)', fontsize=12)
+  axes[1, 1].set_xlabel('q2 (radians)', fontsize=12)
+  axes[1, 1].set_ylabel('q3 (radians)', fontsize=12)
   axes[1, 1].set_title('Left: q3 vs q2', fontsize=13, fontweight='bold')
   axes[1, 1].grid(True, alpha=0.3)
   axes[1, 1].legend()
@@ -286,7 +286,7 @@ def plot_angle_dependencies(angles_data, measurement_name, save_path=None, start
   axes[2, 0].plot(time, qr2, 'k-', linewidth=1.5, label='Right q2 (raw)', alpha=0.7)
   axes[2, 0].plot(time, q2_r_approx, 'brown', linestyle='--', linewidth=2, label='Right q2 (polynomial)', alpha=0.8)
   axes[2, 0].set_xlabel('Time (seconds)', fontsize=12)
-  axes[2, 0].set_ylabel('q2 (degrees)', fontsize=12)
+  axes[2, 0].set_ylabel('q2 (radians)', fontsize=12)
   axes[2, 0].set_title('Right: q2 vs time', fontsize=13, fontweight='bold')
   axes[2, 0].grid(True, alpha=0.3)
   axes[2, 0].legend()
@@ -294,7 +294,7 @@ def plot_angle_dependencies(angles_data, measurement_name, save_path=None, start
   axes[2, 1].plot(time, ql2, 'r-', linewidth=1.5, label='Left q2 (raw)', alpha=0.7)
   axes[2, 1].plot(time, q2_l_approx, 'b--', linewidth=2, label='Left q2 (polynomial)', alpha=0.8)
   axes[2, 1].set_xlabel('Time (seconds)', fontsize=12)
-  axes[2, 1].set_ylabel('q2 (degrees)', fontsize=12)
+  axes[2, 1].set_ylabel('q2 (radians)', fontsize=12)
   axes[2, 1].set_title('Left: q2 vs time', fontsize=13, fontweight='bold')
   axes[2, 1].grid(True, alpha=0.3)
   axes[2, 1].legend()
@@ -302,7 +302,7 @@ def plot_angle_dependencies(angles_data, measurement_name, save_path=None, start
   axes[3, 0].plot(time, dq2_r_dt, 'k-', linewidth=1.5, label='Right dq2/dt (raw)', alpha=0.7)
   axes[3, 0].plot(time, dq2_r_dt_approx, 'brown', linestyle='--', linewidth=2, label='Right dq2/dt (from polynomial)', alpha=0.8)
   axes[3, 0].set_xlabel('Time (seconds)', fontsize=12)
-  axes[3, 0].set_ylabel('dq2/dt (degrees/s)', fontsize=12)
+  axes[3, 0].set_ylabel('dq2/dt (radians/s)', fontsize=12)
   axes[3, 0].set_title('Right: dq2/dt vs time', fontsize=13, fontweight='bold')
   axes[3, 0].grid(True, alpha=0.3)
   axes[3, 0].legend()
@@ -310,7 +310,7 @@ def plot_angle_dependencies(angles_data, measurement_name, save_path=None, start
   axes[3, 1].plot(time, dq2_l_dt, 'r-', linewidth=1.5, label='Left dq2/dt (raw)', alpha=0.7)
   axes[3, 1].plot(time, dq2_l_dt_approx, 'b--', linewidth=2, label='Left dq2/dt (from polynomial)', alpha=0.8)
   axes[3, 1].set_xlabel('Time (seconds)', fontsize=12)
-  axes[3, 1].set_ylabel('dq2/dt (degrees/s)', fontsize=12)
+  axes[3, 1].set_ylabel('dq2/dt (radians/s)', fontsize=12)
   axes[3, 1].set_title('Left: dq2/dt vs time', fontsize=13, fontweight='bold')
   axes[3, 1].grid(True, alpha=0.3)
   axes[3, 1].legend()

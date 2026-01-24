@@ -19,7 +19,7 @@ def angle_with_xy_plane(vector):
     vector: 3D vector (numpy array)
   
   Returns:
-    Angle in degrees
+    Angle in radians
   """
   xy_projection = np.array([vector[0], vector[1], 0])
   
@@ -30,7 +30,7 @@ def angle_with_xy_plane(vector):
   cos_angle = np.clip(cos_angle, -1.0, 1.0)
   angle = np.arccos(cos_angle)
   
-  return np.degrees(angle)
+  return angle
 
 
 def angle_between_vectors(v1, v2):
@@ -42,7 +42,7 @@ def angle_between_vectors(v1, v2):
     v2: Second 3D vector
   
   Returns:
-    Angle in degrees
+    Angle in radians
   """
   if np.linalg.norm(v1) == 0 or np.linalg.norm(v2) == 0:
     return 0.0
@@ -51,7 +51,7 @@ def angle_between_vectors(v1, v2):
   cos_angle = np.clip(cos_angle, -1.0, 1.0)
   angle = np.arccos(cos_angle)
   
-  return np.degrees(angle)
+  return angle
 
 
 def calculate_angles(frames_data, marker_names):
@@ -110,12 +110,12 @@ def calculate_angles(frames_data, marker_names):
       # qr2: angle between ra->rk and rh->rk
       vec_ra_rk = rk - ra
       vec_rh_rk = rk - rh
-      angles['qr2'][frame_idx] = 180.0 - angle_between_vectors(vec_ra_rk, vec_rh_rk)
+      angles['qr2'][frame_idx] = np.pi - angle_between_vectors(vec_ra_rk, vec_rh_rk)
       
       # qr3: angle between rk->rh and rs->rh
       vec_rk_rh = rh - rk
       vec_rs_rh = rh - rs
-      angles['qr3'][frame_idx] = 180.0 - angle_between_vectors(vec_rk_rh, vec_rs_rh)
+      angles['qr3'][frame_idx] = np.pi - angle_between_vectors(vec_rk_rh, vec_rs_rh)
     
     # Left side angles
     if has_left:
@@ -131,12 +131,12 @@ def calculate_angles(frames_data, marker_names):
       # ql2: angle between la->lk and lh->lk
       vec_la_lk = lk - la
       vec_lh_lk = lk - lh
-      angles['ql2'][frame_idx] = 180.0 - angle_between_vectors(vec_la_lk, vec_lh_lk)
+      angles['ql2'][frame_idx] = np.pi - angle_between_vectors(vec_la_lk, vec_lh_lk)
       
       # ql3: angle between lk->lh and ls->lh
       vec_lk_lh = lh - lk
       vec_ls_lh = lh - ls
-      angles['ql3'][frame_idx] = 180.0 - angle_between_vectors(vec_lk_lh, vec_ls_lh)
+      angles['ql3'][frame_idx] = np.pi - angle_between_vectors(vec_lk_lh, vec_ls_lh)
   
   return angles
 
@@ -185,7 +185,7 @@ def plot_angles(angles, frequency=100, save_path=None, start_frame=None, end_fra
   # Plot qr1 and ql1
   axes[0].plot(time, plot_angles['qr1'], 'b-', linewidth=2, label='qr1 (Right)', alpha=0.8)
   axes[0].plot(time, plot_angles['ql1'], 'r-', linewidth=2, label='ql1 (Left)', alpha=0.8)
-  axes[0].set_ylabel('Angle (degrees)', fontsize=12)
+  axes[0].set_ylabel('Angle (radians)', fontsize=12)
   axes[0].set_title('Q1: Angle between knee-ankle and XY plane', fontsize=13, fontweight='bold')
   axes[0].legend(loc='upper right', fontsize=11)
   axes[0].grid(True, alpha=0.3)
@@ -193,7 +193,7 @@ def plot_angles(angles, frequency=100, save_path=None, start_frame=None, end_fra
   # Plot qr2 and ql2
   axes[1].plot(time, plot_angles['qr2'], 'b-', linewidth=2, label='qr2 (Right)', alpha=0.8)
   axes[1].plot(time, plot_angles['ql2'], 'r-', linewidth=2, label='ql2 (Left)', alpha=0.8)
-  axes[1].set_ylabel('Angle (degrees)', fontsize=12)
+  axes[1].set_ylabel('Angle (radians)', fontsize=12)
   axes[1].set_title('Q2: Angle at knee joint (ankle-knee-hip)', fontsize=13, fontweight='bold')
   axes[1].legend(loc='upper right', fontsize=11)
   axes[1].grid(True, alpha=0.3)
@@ -202,7 +202,7 @@ def plot_angles(angles, frequency=100, save_path=None, start_frame=None, end_fra
   axes[2].plot(time, plot_angles['qr3'], 'b-', linewidth=2, label='qr3 (Right)', alpha=0.8)
   axes[2].plot(time, plot_angles['ql3'], 'r-', linewidth=2, label='ql3 (Left)', alpha=0.8)
   axes[2].set_xlabel('Time (seconds)', fontsize=12)
-  axes[2].set_ylabel('Angle (degrees)', fontsize=12)
+  axes[2].set_ylabel('Angle (radians)', fontsize=12)
   axes[2].set_title('Q3: Angle at hip joint (knee-hip-shoulder)', fontsize=13, fontweight='bold')
   axes[2].legend(loc='upper right', fontsize=11)
   axes[2].grid(True, alpha=0.3)
@@ -269,14 +269,14 @@ def main():
   # Print statistics
   print("\n📊 Angle Statistics:")
   print(f"\n  Right side:")
-  print(f"    qr1: {angles['qr1'].mean():.1f}° ± {angles['qr1'].std():.1f}° (range: {angles['qr1'].min():.1f}° - {angles['qr1'].max():.1f}°)")
-  print(f"    qr2: {angles['qr2'].mean():.1f}° ± {angles['qr2'].std():.1f}° (range: {angles['qr2'].min():.1f}° - {angles['qr2'].max():.1f}°)")
-  print(f"    qr3: {angles['qr3'].mean():.1f}° ± {angles['qr3'].std():.1f}° (range: {angles['qr3'].min():.1f}° - {angles['qr3'].max():.1f}°)")
+  print(f"    qr1: {angles['qr1'].mean():.4f} rad ± {angles['qr1'].std():.4f} rad (range: {angles['qr1'].min():.4f} - {angles['qr1'].max():.4f} rad)")
+  print(f"    qr2: {angles['qr2'].mean():.4f} rad ± {angles['qr2'].std():.4f} rad (range: {angles['qr2'].min():.4f} - {angles['qr2'].max():.4f} rad)")
+  print(f"    qr3: {angles['qr3'].mean():.4f} rad ± {angles['qr3'].std():.4f} rad (range: {angles['qr3'].min():.4f} - {angles['qr3'].max():.4f} rad)")
   
   print(f"\n  Left side:")
-  print(f"    ql1: {angles['ql1'].mean():.1f}° ± {angles['ql1'].std():.1f}° (range: {angles['ql1'].min():.1f}° - {angles['ql1'].max():.1f}°)")
-  print(f"    ql2: {angles['ql2'].mean():.1f}° ± {angles['ql2'].std():.1f}° (range: {angles['ql2'].min():.1f}° - {angles['ql2'].max():.1f}°)")
-  print(f"    ql3: {angles['ql3'].mean():.1f}° ± {angles['ql3'].std():.1f}° (range: {angles['ql3'].min():.1f}° - {angles['ql3'].max():.1f}°)")
+  print(f"    ql1: {angles['ql1'].mean():.4f} rad ± {angles['ql1'].std():.4f} rad (range: {angles['ql1'].min():.4f} - {angles['ql1'].max():.4f} rad)")
+  print(f"    ql2: {angles['ql2'].mean():.4f} rad ± {angles['ql2'].std():.4f} rad (range: {angles['ql2'].min():.4f} - {angles['ql2'].max():.4f} rad)")
+  print(f"    ql3: {angles['ql3'].mean():.4f} rad ± {angles['ql3'].std():.4f} rad (range: {angles['ql3'].min():.4f} - {angles['ql3'].max():.4f} rad)")
   
   # Get frequency from metadata
   frequency = float(data['metadata'].get('FREQUENCY', 100))

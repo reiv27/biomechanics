@@ -161,20 +161,20 @@ def process_measurement(measurement_num, output_dir=None, start_frame=None, end_
   
   print(f"\n📊 Angle Statistics:")
   print(f"\n  Right side:")
-  print(f"    qr1: {calculated_angles['qr1'].mean():.1f}° ± {calculated_angles['qr1'].std():.1f}° "
-        f"(range: {calculated_angles['qr1'].min():.1f}° - {calculated_angles['qr1'].max():.1f}°)")
-  print(f"    qr2: {calculated_angles['qr2'].mean():.1f}° ± {calculated_angles['qr2'].std():.1f}° "
-        f"(range: {calculated_angles['qr2'].min():.1f}° - {calculated_angles['qr2'].max():.1f}°)")
-  print(f"    qr3: {calculated_angles['qr3'].mean():.1f}° ± {calculated_angles['qr3'].std():.1f}° "
-        f"(range: {calculated_angles['qr3'].min():.1f}° - {calculated_angles['qr3'].max():.1f}°)")
+  print(f"    qr1: {calculated_angles['qr1'].mean():.4f} rad ± {calculated_angles['qr1'].std():.4f} rad "
+        f"(range: {calculated_angles['qr1'].min():.4f} - {calculated_angles['qr1'].max():.4f} rad)")
+  print(f"    qr2: {calculated_angles['qr2'].mean():.4f} rad ± {calculated_angles['qr2'].std():.4f} rad "
+        f"(range: {calculated_angles['qr2'].min():.4f} - {calculated_angles['qr2'].max():.4f} rad)")
+  print(f"    qr3: {calculated_angles['qr3'].mean():.4f} rad ± {calculated_angles['qr3'].std():.4f} rad "
+        f"(range: {calculated_angles['qr3'].min():.4f} - {calculated_angles['qr3'].max():.4f} rad)")
   
   print(f"\n  Left side:")
-  print(f"    ql1: {calculated_angles['ql1'].mean():.1f}° ± {calculated_angles['ql1'].std():.1f}° "
-        f"(range: {calculated_angles['ql1'].min():.1f}° - {calculated_angles['ql1'].max():.1f}°)")
-  print(f"    ql2: {calculated_angles['ql2'].mean():.1f}° ± {calculated_angles['ql2'].std():.1f}° "
-        f"(range: {calculated_angles['ql2'].min():.1f}° - {calculated_angles['ql2'].max():.1f}°)")
-  print(f"    ql3: {calculated_angles['ql3'].mean():.1f}° ± {calculated_angles['ql3'].std():.1f}° "
-        f"(range: {calculated_angles['ql3'].min():.1f}° - {calculated_angles['ql3'].max():.1f}°)")
+  print(f"    ql1: {calculated_angles['ql1'].mean():.4f} rad ± {calculated_angles['ql1'].std():.4f} rad "
+        f"(range: {calculated_angles['ql1'].min():.4f} - {calculated_angles['ql1'].max():.4f} rad)")
+  print(f"    ql2: {calculated_angles['ql2'].mean():.4f} rad ± {calculated_angles['ql2'].std():.4f} rad "
+        f"(range: {calculated_angles['ql2'].min():.4f} - {calculated_angles['ql2'].max():.4f} rad)")
+  print(f"    ql3: {calculated_angles['ql3'].mean():.4f} rad ± {calculated_angles['ql3'].std():.4f} rad "
+        f"(range: {calculated_angles['ql3'].min():.4f} - {calculated_angles['ql3'].max():.4f} rad)")
   
   output_path = output_dir / f'Measurement{measurement_num}_calculated_angles.json'
   print(f"\n💾 Saving angles to JSON...")
