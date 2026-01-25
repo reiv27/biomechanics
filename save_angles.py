@@ -15,8 +15,11 @@ def save_angles_to_json(angles, metadata, output_path, frequency=100, start_fram
   """
   Save calculated angles to JSON file.
   
+  IMPORTANT: Angles are saved in RADIANS (as returned by calculate_angles).
+  No conversion to degrees is performed.
+  
   Args:
-    angles: Dictionary with angle arrays (qr1, qr2, qr3, ql1, ql2, ql3)
+    angles: Dictionary with angle arrays (qr1, qr2, qr3, ql1, ql2, ql3) in RADIANS
     metadata: Dictionary with metadata from marker data
     output_path: Path to output JSON file
     frequency: Sampling frequency in Hz
@@ -47,22 +50,25 @@ def save_angles_to_json(angles, metadata, output_path, frequency=100, start_fram
     saved_frames = num_frames
     frame_range = None
   
+  # Angles are saved in RADIANS (as returned by calculate_angles)
+  # No conversion to degrees is performed
   json_data = {
     'metadata': {
       'frequency': frequency,
       'num_frames': saved_frames,
-      'source_metadata': metadata
+      'source_metadata': metadata,
+      'angle_units': 'radians'  # Explicitly mark that angles are in radians
     },
     'angles': {
       'right': {
-        'qr1': save_angles['qr1'].tolist(),
-        'qr2': save_angles['qr2'].tolist(),
-        'qr3': save_angles['qr3'].tolist()
+        'qr1': save_angles['qr1'].tolist(),  # Values in radians
+        'qr2': save_angles['qr2'].tolist(),  # Values in radians
+        'qr3': save_angles['qr3'].tolist()   # Values in radians
       },
       'left': {
-        'ql1': save_angles['ql1'].tolist(),
-        'ql2': save_angles['ql2'].tolist(),
-        'ql3': save_angles['ql3'].tolist()
+        'ql1': save_angles['ql1'].tolist(),  # Values in radians
+        'ql2': save_angles['ql2'].tolist(),  # Values in radians
+        'ql3': save_angles['ql3'].tolist()   # Values in radians
       }
     },
     'statistics': {
