@@ -205,6 +205,7 @@ def plot_angle_dependencies(angles_data, measurement_name, save_path=None, start
     range_info = f' (frames {start}-{end})'
   else:
     range_info = ''
+    
   
   frequency = angles_data['metadata'].get('frequency', 100)
   num_frames = len(angles_data['angles']['right']['q1'])
