@@ -43,6 +43,9 @@ class CombinedVisualizer:
     self.scatter = None
     self.labels = []
     
+    # Lines for skeleton connections
+    self.skeleton_lines = []
+    
     # Lines for angle plots
     self.line_qr1 = None
     self.line_ql1 = None
@@ -135,6 +138,51 @@ class CombinedVisualizer:
         va='bottom'
       )
       self.labels.append(label)
+    
+    # Create skeleton connections
+    self._create_skeleton_connections(first_frame)
+  
+  def _create_skeleton_connections(self, frame):
+    """Create lines connecting joints to form a skeleton."""
+    # Create index mapping for marker names
+    marker_indices = {name: i for i, name in enumerate(self.simple_names)}
+    
+    # Define skeleton connections: (marker1, marker2, color)
+    connections = []
+    
+    # Right side: ankle -> knee -> hip -> shoulder
+    if 'ra' in marker_indices and 'rk' in marker_indices:
+      connections.append(('ra', 'rk', 'blue'))
+    if 'rk' in marker_indices and 'rh' in marker_indices:
+      connections.append(('rk', 'rh', 'blue'))
+    if 'rh' in marker_indices and 'rs' in marker_indices:
+      connections.append(('rh', 'rs', 'blue'))
+    
+    # Left side: ankle -> knee -> hip -> shoulder
+    if 'la' in marker_indices and 'lk' in marker_indices:
+      connections.append(('la', 'lk', 'red'))
+    if 'lk' in marker_indices and 'lh' in marker_indices:
+      connections.append(('lk', 'lh', 'red'))
+    if 'lh' in marker_indices and 'ls' in marker_indices:
+      connections.append(('lh', 'ls', 'red'))
+    
+    # Connect shoulders (optional)
+    if 'rs' in marker_indices and 'ls' in marker_indices:
+      connections.append(('rs', 'ls', 'green'))
+    
+    # Create line objects for each connection
+    self.skeleton_lines = []
+    for m1_name, m2_name, color in connections:
+      idx1 = marker_indices[m1_name]
+      idx2 = marker_indices[m2_name]
+      
+      x_coords = [frame[idx1][0], frame[idx2][0]]
+      y_coords = [frame[idx1][1], frame[idx2][1]]
+      z_coords = [frame[idx1][2], frame[idx2][2]]
+      
+      line, = self.ax_3d.plot(x_coords, y_coords, z_coords, 
+                              color=color, linewidth=2.5, alpha=0.7)
+      self.skeleton_lines.append((line, idx1, idx2))
   
   def _setup_angle_plots(self, frequency):
     """Set up angle plot axes."""
@@ -201,6 +249,14 @@ class CombinedVisualizer:
       self.labels[i].set_position((x, y))
       self.labels[i].set_3d_properties(z, 'z')
     
+    # Update skeleton connections
+    for line, idx1, idx2 in self.skeleton_lines:
+      x_coords = [current_frame[idx1][0], current_frame[idx2][0]]
+      y_coords = [current_frame[idx1][1], current_frame[idx2][1]]
+      z_coords = [current_frame[idx1][2], current_frame[idx2][2]]
+      line.set_data(x_coords, y_coords)
+      line.set_3d_properties(z_coords)
+    
     # Update 3D title
     self.ax_3d.set_title(f'3D Marker Positions - Frame {frame_num + 1}/{len(self.frames_data)}', 
                          fontsize=12, fontweight='bold')
@@ -223,7 +279,9 @@ class CombinedVisualizer:
     self.line_qr3.set_data(self.time_data, self.qr3_data)
     self.line_ql3.set_data(self.time_data, self.ql3_data)
     
-    return ([self.scatter] + self.labels + 
+    # Collect all artists for blitting
+    skeleton_artists = [line for line, _, _ in self.skeleton_lines]
+    return ([self.scatter] + self.labels + skeleton_artists +
             [self.line_qr1, self.line_ql1, self.line_qr2, 
              self.line_ql2, self.line_qr3, self.line_ql3])
   
@@ -340,15 +398,26 @@ def main():
       writer = 'pillow'
     elif args.save.endswith('.mp4'):
       writer = 'ffmpeg'
+      # Ensure output file has .mp4 extension
+      if not args.save.endswith('.mp4'):
+        args.save = args.save + '.mp4'
     else:
-      writer = None
+      # Default to mp4 if no extension provided
+      if '.' not in args.save:
+        args.save = args.save + '.mp4'
+        writer = 'ffmpeg'
+      else:
+        writer = None
     
     try:
-      anim.save(args.save, writer=writer, fps=int(1000/args.interval))
+      fps = max(1, int(1000 / args.interval))  # Ensure fps is at least 1
+      print(f"   Using writer: {writer}, FPS: {fps}")
+      anim.save(args.save, writer=writer, fps=fps, bitrate=1800)
       print(f"✅ Animation saved: {args.save}")
     except Exception as e:
       print(f"❌ Error saving: {e}")
       print("   Try installing: sudo apt-get install ffmpeg")
+      print("   Or use: pip install imageio-ffmpeg")
   else:
     print("\n▶️  Animation started. Close window to exit.")
     plt.show()
