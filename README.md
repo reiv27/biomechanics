@@ -172,6 +172,19 @@ python3 approximation.py --measurement 1 --save plot.png
 - Right side: Black (raw data), Brown (polynomials)
 - Left side: Red (raw data), Blue (polynomials)
 
+### Dynamics and Phase Portrait (Jupyter)
+
+The notebook `dynamics_handmade.ipynb` implements reduced dynamics (alpha, beta, gamma) and phase portrait visualization.
+
+**Features:**
+- Load polynomial coefficients and q2 data from `approximation_data.json`
+- Simulate dynamics: Euler integration for theta, theta_dot
+- Phase portrait: trajectories near (0, 0), optional user data overlay (red)
+- All plots are saved to PDF in `data/pdf/`:
+  - `phase_portrait.pdf` – phase portrait from `plot_phase_portrait()`
+  - `phase_portrait_modeling.pdf` – modeling trajectory (theta vs theta_dot)
+  - `tau_time.pdf` – joint torques tau_1, tau_2 vs time
+
 ### Combined Visualization (3D + Angles)
 
 ```bash
@@ -184,21 +197,24 @@ python3 visualize_with_angles.py data/Measurement1.tsv --interval 1
 # Speed up animation (skip frames, faster but less smooth)
 python3 visualize_with_angles.py data/Measurement1.tsv --skip-frames 5
 
-# Save animation
+# Save animation as MP4 (recommended; requires ffmpeg)
+python3 visualize_with_angles.py data/Measurement1.tsv --save animation.mp4
+
+# Save as GIF
 python3 visualize_with_angles.py data/Measurement1.tsv --save combined.gif
 ```
 
 **Speed control:**
-- `--interval 1` - Very fast (all frames, 1ms between frames) ⚡
+- `--interval 1` - Very fast (all frames, 1ms between frames)
 - `--interval 5` - Fast (all frames, 5ms between frames)
 - `--interval 10` - Normal speed (default)
 - `--interval 30` - Slow (all frames, 30ms between frames)
 - `--skip-frames N` - Skip every N frames (less smooth)
 
 **Display:**
-- Left side: 3D marker animation
+- Left side: 3D marker animation with **skeleton connections** (right: blue, left: red, shoulders: green)
 - Right side: Three angle plots that build progressively
-- Real-time synchronization: graphs "follow" the 3D animation
+- Real-time synchronization: graphs follow the 3D animation
 - Angles are plotted point-by-point as animation progresses
 
 ## Data
@@ -218,12 +234,18 @@ python3 visualize_with_angles.py data/Measurement1.tsv --save combined.gif
 data/
 ├── Measurement1.tsv          # Raw marker data
 ├── Measurement2.tsv          # Raw marker data
-├── calculated_angles/        # Calculated angles (JSON)
+├── calculated_angles/       # Calculated angles (JSON, radians)
 │   ├── Measurement1_calculated_angles.json
 │   └── Measurement2_calculated_angles.json
-└── angle_data/              # Reference angle data (TSV)
-    ├── mes1/                # Measurement 1 reference angles
-    └── mes2/                # Measurement 2 reference angles
+├── angle_data/              # Reference angle data (TSV)
+│   ├── mes1/                # Measurement 1 reference angles
+│   └── mes2/                # Measurement 2 reference angles
+├── clear_data/              # Qualisys project files (.qtm)
+└── pdf/                     # Exported PDF plots from dynamics notebook
+    ├── phase_portrait.pdf
+    ├── phase_portrait_modeling.pdf
+    ├── tau_time.pdf
+    └── ...                  # Other generated PDFs
 ```
 
 ## Marker Naming System
